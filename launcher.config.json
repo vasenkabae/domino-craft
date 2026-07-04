@@ -1,0 +1,6 @@
+{
+  "name": "Vasenka Launcher",
+  "manifestUrl": "https://raw.githubusercontent.com/CHANGE_ME_GITHUB_LOGIN/vasenka-modpack/main/manifest.json",
+  "newsUrl": "https://raw.githubusercontent.com/CHANGE_ME_GITHUB_LOGIN/vasenka-modpack/main/news.json",
+  "azureClientId": null
+}
