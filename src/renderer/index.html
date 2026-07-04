@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Vasenka Launcher</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="login" class="screen">
+  <div class="login-card">
+    <div class="logo">⛏</div>
+    <h1 id="title-login">Vasenka Launcher</h1>
+    <p class="subtitle">Сервер для своих</p>
+    <input id="nick" placeholder="Ник (латиница, 3–16)" maxlength="16" spellcheck="false">
+    <button id="btn-offline" class="primary">Играть</button>
+    <div class="divider"><span>или</span></div>
+    <button id="btn-ms">Войти через Microsoft</button>
+    <div id="login-error" class="error-text"></div>
+  </div>
+</div>
+
+<div id="main" class="screen hidden">
+  <header>
+    <div class="brand" id="title-main">Vasenka Launcher</div>
+    <div class="server-chip offline" id="server-chip">Сервер: проверяем…</div>
+    <div class="user">
+      <span id="user-name"></span>
+      <button id="btn-settings" class="icon" title="Настройки">⚙</button>
+    </div>
+  </header>
+
+  <section class="news" id="news">
+    <div class="news-empty">Новостей пока нет</div>
+  </section>
+
+  <footer>
+    <div class="progress-wrap">
+      <div id="progress-label"></div>
+      <div class="bar"><div id="bar-fill"></div></div>
+    </div>
+    <button id="btn-play" class="primary big">ИГРАТЬ</button>
+  </footer>
+</div>
+
+<div id="settings-modal" class="modal hidden">
+  <div class="modal-card">
+    <h2>Настройки</h2>
+    <label class="field">
+      Память для игры: <b id="mem-label"></b>
+      <input type="range" id="mem" min="2048" max="16384" step="1024">
+    </label>
+    <div class="modal-buttons">
+      <button id="btn-logout">Выйти из аккаунта</button>
+      <button id="btn-close-settings" class="primary">Готово</button>
+    </div>
+  </div>
+</div>
+
+<div id="error-modal" class="modal hidden">
+  <div class="modal-card wide">
+    <h2>Ошибка</h2>
+    <pre id="error-text"></pre>
+    <div class="modal-buttons">
+      <button id="btn-copy-error">Скопировать</button>
+      <button id="btn-close-error" class="primary">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
