@@ -1,0 +1,48 @@
+{
+  "name": "vasenka-launcher",
+  "productName": "Vasenka Launcher",
+  "version": "0.1.0",
+  "description": "Лаунчер Minecraft для своего сервера",
+  "main": "src/main/index.js",
+  "author": "vasenka",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "electron . --smoke",
+    "test": "vitest run",
+    "dist": "electron-builder --win"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9",
+    "extract-zip": "^2.0.1",
+    "minecraft-launcher-core": "^3.18.2",
+    "minecraft-server-util": "^5.4.4",
+    "msmc": "^4.1.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "vitest": "^2.1.8"
+  },
+  "build": {
+    "appId": "ru.vasenka.launcher",
+    "productName": "Vasenka Launcher",
+    "files": [
+      "src/**/*",
+      "launcher.config.json",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "CHANGE_ME_GITHUB_LOGIN",
+      "repo": "vasenka-launcher"
+    }
+  }
+}
