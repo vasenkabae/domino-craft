@@ -1,6 +1,6 @@
-{
-  "name": "vasenka-launcher",
-  "productName": "Vasenka Launcher",
+﻿{
+  "name": "domino-craft",
+  "productName": "Domino Craft",
   "version": "0.1.0",
   "description": "Лаунчер Minecraft для своего сервера",
   "main": "src/main/index.js",
@@ -25,8 +25,8 @@
     "vitest": "^2.1.8"
   },
   "build": {
-    "appId": "ru.vasenka.launcher",
-    "productName": "Vasenka Launcher",
+    "appId": "ru.vasenka.dominocraft",
+    "productName": "Domino Craft",
     "files": [
       "src/**/*",
       "launcher.config.json",
@@ -42,7 +42,7 @@
     "publish": {
       "provider": "github",
       "owner": "CHANGE_ME_GITHUB_LOGIN",
-      "repo": "vasenka-launcher"
+      "repo": "domino-craft"
     }
   }
 }
