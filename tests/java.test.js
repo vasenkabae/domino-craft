@@ -11,7 +11,9 @@ describe('requiredJavaMajor', () => {
     ['1.20.4', 17],
     ['1.20.5', 21],
     ['1.21', 21],
-    ['1.21.4', 21]
+    ['1.21.4', 21],
+    ['25.1', 21],
+    ['26.2', 21]
   ])('%s → Java %i', (mc, major) => {
     expect(requiredJavaMajor(mc)).toBe(major);
   });

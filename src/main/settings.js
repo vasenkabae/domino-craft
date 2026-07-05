@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const DEFAULTS = { memoryMb: 4096 };
+const DEFAULTS = { memoryMb: 4096, mode: 'pack', vanillaVersion: null };
 
 async function loadSettings(file) {
   try {

@@ -4,9 +4,12 @@ const path = require('path');
 const extract = require('extract-zip');
 const { downloadFile } = require('./downloader');
 
-// Минимально необходимая Java: 1.20.5+ → 21, 1.17+ → 17, старее → 8.
+// Эвристика на случай, когда JSON Mojang недоступен (точное значение
+// берётся из javaVersion в getVersionJavaMajor). Для схемы 1.x.y:
+// 1.20.5+ → 21, 1.17+ → 17, старее → 8. Новая схема (25.x+) → 21.
 function requiredJavaMajor(mcVersion) {
   const parts = mcVersion.split('.').map(n => parseInt(n, 10) || 0);
+  if (parts[0] !== 1) return 21;
   const minor = parts[1] || 0;
   const patch = parts[2] || 0;
   if (minor > 20 || (minor === 20 && patch >= 5)) return 21;
