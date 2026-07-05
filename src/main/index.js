@@ -3,6 +3,8 @@ const path = require('path');
 const { registerIpc } = require('./ipc');
 
 const smoke = process.argv.includes('--smoke');
+// в smoke-режиме GPU-композитор отдаёт пустой capturePage — рендерим программно
+if (smoke) app.disableHardwareAcceleration();
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -35,10 +37,18 @@ app.whenReady().then(() => {
     const shotIdx = process.argv.indexOf('--smoke') + 1;
     const shotPath = process.argv[shotIdx] && process.argv[shotIdx].endsWith('.png')
       ? process.argv[shotIdx] : null;
+    win.setAlwaysOnTop(true);
     setTimeout(async () => {
       if (shotPath) {
-        const img = await win.webContents.capturePage();
-        require('fs').writeFileSync(shotPath, img.toPNG());
+        try {
+          win.moveTop();
+          win.focus();
+          const img = await win.webContents.capturePage();
+          console.log('[smoke] capture:', JSON.stringify(img.getSize()), 'empty:', img.isEmpty());
+          require('fs').writeFileSync(shotPath, img.toPNG());
+        } catch (e) {
+          console.log('[smoke] capture error:', e.message);
+        }
       }
       app.exit(0);
     }, 3000);
