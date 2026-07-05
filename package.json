@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "electron-updater": "^6.3.9",
-    "extract-zip": "^2.0.1",
     "minecraft-launcher-core": "^3.18.2",
     "minecraft-server-util": "^5.4.4",
     "msmc": "^4.1.0"

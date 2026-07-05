@@ -1,8 +1,18 @@
 const fs = require('fs/promises');
 const fssync = require('fs');
 const path = require('path');
-const extract = require('extract-zip');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
 const { downloadFile } = require('./downloader');
+
+const execFileP = promisify(execFile);
+
+// Распаковка встроенным в Windows bsdtar: extract-zip на некоторых машинах
+// молча обрывается посреди архива (antivirus?), tar.exe надёжен.
+async function extractZip(zipPath, dir) {
+  await fs.mkdir(dir, { recursive: true });
+  await execFileP('tar', ['-xf', zipPath, '-C', dir]);
+}
 
 // Эвристика на случай, когда JSON Mojang недоступен (точное значение
 // берётся из javaVersion в getVersionJavaMajor). Для схемы 1.x.y:
@@ -34,7 +44,7 @@ async function ensureJava(major, baseDir, onProgress = () => {}) {
   const zipPath = dir + '.zip';
   await downloadFile(link, zipPath);
   onProgress('Распаковка Java ' + major);
-  await extract(zipPath, { dir });
+  await extractZip(zipPath, dir);
   await fs.rm(zipPath, { force: true });
 
   const javaw = findJavaw(dir);
