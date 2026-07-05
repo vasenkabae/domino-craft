@@ -1,7 +1,7 @@
 // Собирает опции для minecraft-launcher-core.
 // Автоподключение к серверу: quickPlay работает с 1.20+,
 // для более старых версий — классические аргументы --server/--port.
-function buildLaunchOptions({ manifest, auth, memoryMb, root, javaPath, customVersion, forgeInstaller }) {
+function buildLaunchOptions({ manifest, auth, memoryMb, root, javaPath, customVersion, forgeInstaller, fullscreen, resolution }) {
   const opts = {
     authorization: auth,
     root,
@@ -12,6 +12,13 @@ function buildLaunchOptions({ manifest, auth, memoryMb, root, javaPath, customVe
   };
   if (customVersion) opts.version.custom = customVersion;
   if (forgeInstaller) opts.forge = forgeInstaller;
+
+  // Размер окна / полноэкранный режим игры
+  if (fullscreen) {
+    opts.window = { fullscreen: true };
+  } else if (resolution && resolution.width && resolution.height) {
+    opts.window = { width: resolution.width, height: resolution.height };
+  }
 
   const srv = manifest.server;
   if (srv && srv.host) {

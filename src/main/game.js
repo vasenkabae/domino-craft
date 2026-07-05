@@ -44,7 +44,9 @@ async function playVanilla({ settings, auth, paths, emit }) {
     auth,
     memoryMb: settings.memoryMb,
     root: path.join(userData, 'vanilla'),
-    javaPath
+    javaPath,
+    fullscreen: settings.fullscreen,
+    resolution: { width: settings.resWidth, height: settings.resHeight }
   });
   await launchClient(opts, emit);
 }
@@ -94,7 +96,9 @@ async function playPack({ config, settings, auth, paths, emit }) {
     root,
     javaPath,
     customVersion,
-    forgeInstaller
+    forgeInstaller,
+    fullscreen: settings.fullscreen,
+    resolution: { width: settings.resWidth, height: settings.resHeight }
   });
   await launchClient(opts, emit);
 }

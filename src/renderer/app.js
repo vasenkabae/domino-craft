@@ -8,6 +8,7 @@ init();
 async function init() {
   const state = await launcher.getState();
   settings = state.settings;
+  applyFx();
   $('title-login').textContent = state.config.name;
   $('title-main').textContent = state.config.name;
   document.title = state.config.name;
@@ -54,11 +55,39 @@ async function init() {
   $('btn-settings').onclick = () => {
     $('mem').value = settings.memoryMb;
     $('mem-label').textContent = fmtMem(settings.memoryMb);
+    $('res-w').value = settings.resWidth;
+    $('res-h').value = settings.resHeight;
+    $('fullscreen').checked = !!settings.fullscreen;
+    $('after-launch').value = settings.afterLaunch || 'minimize';
+    $('game-dir').value = settings.gameDir || '';
+    $('opt-dominoes').checked = settings.dominoes !== false;
+    $('opt-sounds').checked = settings.sounds !== false;
     $('settings-modal').classList.remove('hidden');
   };
   $('mem').oninput = e => { $('mem-label').textContent = fmtMem(+e.target.value); };
+
+  // Оформление применяем сразу, чтобы эффект был виден в реальном времени
+  $('opt-dominoes').onchange = e => window.fxControl && window.fxControl.setDominoes(e.target.checked);
+  $('opt-sounds').onchange = e => window.fxControl && window.fxControl.setSounds(e.target.checked);
+
+  $('btn-choose-dir').onclick = async () => {
+    const dir = await launcher.chooseDir();
+    if (dir) $('game-dir').value = dir;
+  };
+  $('btn-reset-dir').onclick = () => { $('game-dir').value = ''; };
+
   $('btn-close-settings').onclick = async () => {
-    settings = await launcher.saveSettings({ memoryMb: +$('mem').value });
+    settings = await launcher.saveSettings({
+      memoryMb: +$('mem').value,
+      resWidth: clampInt($('res-w').value, 640, 7680, 854),
+      resHeight: clampInt($('res-h').value, 480, 4320, 480),
+      fullscreen: $('fullscreen').checked,
+      afterLaunch: $('after-launch').value,
+      gameDir: $('game-dir').value || null,
+      dominoes: $('opt-dominoes').checked,
+      sounds: $('opt-sounds').checked
+    });
+    applyFx();
     $('settings-modal').classList.add('hidden');
   };
   $('btn-logout').onclick = async () => {
@@ -172,6 +201,18 @@ function setPlayState(mode, label) {
 }
 
 function fmtMem(mb) { return (mb / 1024) + ' ГБ'; }
+
+function applyFx() {
+  if (!window.fxControl) return;
+  window.fxControl.setDominoes(settings.dominoes !== false);
+  window.fxControl.setSounds(settings.sounds !== false);
+}
+
+function clampInt(v, min, max, fallback) {
+  const n = parseInt(v, 10);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
 
 function cleanError(e) {
   return String(e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, '');

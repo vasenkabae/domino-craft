@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('launcher', {
   serverStatus: () => ipcRenderer.invoke('server-status'),
   news: () => ipcRenderer.invoke('news'),
   vanillaVersions: () => ipcRenderer.invoke('vanilla-versions'),
+  chooseDir: () => ipcRenderer.invoke('choose-dir'),
   onProgress: cb => ipcRenderer.on('progress', (_e, p) => cb(p)),
   onState: cb => ipcRenderer.on('state', (_e, s) => cb(s))
 });

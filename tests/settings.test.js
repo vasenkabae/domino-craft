@@ -17,4 +17,15 @@ describe('settings', () => {
     expect(s.memoryMb).toBe(8192);
     await fs.rm(dir, { recursive: true, force: true });
   });
+  it('старый файл настроек дополняется новыми дефолтами', async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'launcher-set-'));
+    const file = path.join(dir, 'settings.json');
+    await fs.writeFile(file, JSON.stringify({ memoryMb: 6144 })); // без новых полей
+    const s = await loadSettings(file);
+    expect(s.memoryMb).toBe(6144);
+    expect(s.resWidth).toBe(DEFAULTS.resWidth);
+    expect(s.afterLaunch).toBe('minimize');
+    expect(s.dominoes).toBe(true);
+    await fs.rm(dir, { recursive: true, force: true });
+  });
 });

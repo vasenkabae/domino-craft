@@ -41,6 +41,12 @@ app.whenReady().then(() => {
     setTimeout(async () => {
       if (shotPath) {
         try {
+          if (process.argv.includes('--open-settings')) {
+            await win.webContents.executeJavaScript(
+              "document.getElementById('btn-settings')?.click()"
+            );
+            await new Promise(r => setTimeout(r, 300));
+          }
           win.moveTop();
           win.focus();
           const img = await win.webContents.capturePage();

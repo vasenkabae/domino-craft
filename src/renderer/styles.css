@@ -285,11 +285,53 @@ button.big {
   animation: rise .3s ease both;
 }
 .modal-card.wide { width: 580px; }
+.modal-card.settings { width: 440px; }
 .modal-card h2 { font-size: 19px; }
 .field { display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--muted); }
 .field b { color: var(--accent-2); }
 input[type="range"] { accent-color: var(--accent); }
 .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+
+/* Настройки: прокручиваемый список полей */
+.set-scroll {
+  display: flex; flex-direction: column; gap: 20px;
+  max-height: 60vh; overflow-y: auto;
+  padding-right: 6px;
+  margin-right: -6px;
+}
+.set-scroll::-webkit-scrollbar { width: 8px; }
+.set-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); border-radius: 99px; }
+.field .row { display: flex; align-items: center; gap: 10px; }
+.times { color: var(--muted); }
+input.num, input.grow {
+  background: rgba(10, 12, 17, .6);
+  border: 1px solid var(--line-bright);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+}
+input.num { width: 84px; text-align: center; }
+input.grow { flex: 1; min-width: 0; color: var(--muted); }
+input.num:focus, input.grow:focus { border-color: var(--accent); }
+select {
+  background: rgba(10, 12, 17, .6);
+  border: 1px solid var(--line-bright);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 9px 10px;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+button.small { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
+.check {
+  display: flex; align-items: center; gap: 9px;
+  color: var(--text); font-size: 14px; cursor: pointer;
+}
+.check.inline { margin-left: auto; color: var(--muted); }
+.check input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
 #error-text {
   max-height: 260px; overflow: auto;
   background: rgba(10, 12, 17, .7);
