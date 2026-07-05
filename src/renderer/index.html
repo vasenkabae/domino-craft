@@ -7,9 +7,21 @@
 </head>
 <body>
 
+<canvas id="fx"></canvas>
+
 <div id="login" class="screen">
   <div class="login-card">
-    <div class="logo">⛏</div>
+    <svg class="logo" viewBox="0 0 60 110" width="52" height="95" aria-hidden="true">
+      <rect x="2" y="2" width="56" height="106" rx="10" fill="#eceadf" stroke="#1a1d24" stroke-width="3"/>
+      <line x1="10" y1="55" x2="50" y2="55" stroke="#2a2e38" stroke-width="3" stroke-linecap="round"/>
+      <g fill="#23262e">
+        <circle cx="18" cy="18" r="5.5"/><circle cx="42" cy="28" r="5.5"/><circle cx="18" cy="40" r="5.5"/>
+      </g>
+      <g fill="#3fb950">
+        <circle cx="18" cy="70" r="5.5"/><circle cx="42" cy="70" r="5.5"/>
+        <circle cx="18" cy="92" r="5.5"/><circle cx="42" cy="92" r="5.5"/>
+      </g>
+    </svg>
     <h1 id="title-login">Domino Craft</h1>
     <p class="subtitle">Сервер для своих</p>
     <input id="nick" placeholder="Ник (латиница, 3–16)" maxlength="16" spellcheck="false">
@@ -75,6 +87,7 @@
   </div>
 </div>
 
+<script src="fx.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
