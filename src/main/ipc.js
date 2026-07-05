@@ -64,6 +64,15 @@ function registerIpc(win) {
 
   ipcMain.handle('news', () => fetchNews(config.newsUrl));
 
+  ipcMain.handle('vanilla-versions', async () => {
+    try {
+      const { getVanillaVersions } = require('./vanilla');
+      return await getVanillaVersions(path.join(userData, 'versions.cache.json'));
+    } catch {
+      return { latest: null, releases: [] };
+    }
+  });
+
   ipcMain.handle('play', async () => {
     if (busy) return;
     busy = true;

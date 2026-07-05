@@ -44,6 +44,13 @@ async function init() {
     launcher.play();
   };
 
+  $('mode-pack').onclick = () => setMode('pack');
+  $('mode-vanilla').onclick = () => setMode('vanilla');
+  $('vanilla-version').onchange = async e => {
+    settings = await launcher.saveSettings({ vanillaVersion: e.target.value || null });
+  };
+  setMode(settings.mode || 'pack', true);
+
   $('btn-settings').onclick = () => {
     $('mem').value = settings.memoryMb;
     $('mem-label').textContent = fmtMem(settings.memoryMb);
@@ -81,6 +88,36 @@ async function init() {
       $('error-modal').classList.remove('hidden');
     }
   });
+}
+
+let versionsLoaded = false;
+
+async function setMode(mode, initial = false) {
+  $('mode-pack').classList.toggle('active', mode === 'pack');
+  $('mode-vanilla').classList.toggle('active', mode === 'vanilla');
+  $('vanilla-version').classList.toggle('hidden', mode !== 'vanilla');
+  if (!initial || settings.mode !== mode) {
+    settings = await launcher.saveSettings({ mode });
+  }
+  if (mode === 'vanilla' && !versionsLoaded) {
+    versionsLoaded = true;
+    const { latest, releases } = await launcher.vanillaVersions();
+    const sel = $('vanilla-version');
+    sel.innerHTML = '';
+    for (const id of releases) {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = id === latest ? id + ' (последняя)' : id;
+      sel.append(opt);
+    }
+    if (!releases.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'нет связи с Mojang';
+      sel.append(opt);
+    }
+    sel.value = settings.vanillaVersion || latest || '';
+  }
 }
 
 function showMain(session) {

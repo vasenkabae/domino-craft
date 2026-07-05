@@ -7,10 +7,49 @@ const { downloadFile } = require('./downloader');
 const { requiredJavaMajor, ensureJava } = require('./java');
 const { ensureFabric, ensureForge } = require('./loaders');
 const { buildLaunchOptions } = require('./launch-options');
+const { getVanillaVersions, getVersionJavaMajor } = require('./vanilla');
 
-// Полный цикл запуска: манифест → синхронизация сборки → Java → загрузчик → игра.
+// Точная Java из данных Mojang, при недоступности — эвристика по номеру версии.
+async function resolveJavaMajor(mcVersion, userData) {
+  const exact = await getVersionJavaMajor(
+    mcVersion,
+    path.join(userData, 'versions.cache.json')
+  ).catch(() => null);
+  return exact || requiredJavaMajor(mcVersion);
+}
+
+// Полный цикл запуска. Режим из настроек: 'pack' — наш сервер со сборкой,
+// 'vanilla' — обычный Minecraft выбранной версии (отдельная папка, без модов).
 // emit(channel, payload) шлёт события 'progress' и 'state' в окно.
 async function play({ config, settings, auth, paths, emit }) {
+  if (settings.mode === 'vanilla') return playVanilla({ settings, auth, paths, emit });
+  return playPack({ config, settings, auth, paths, emit });
+}
+
+async function playVanilla({ settings, auth, paths, emit }) {
+  const { userData } = paths;
+  emit('state', { value: 'syncing' });
+  const { latest } = await getVanillaVersions(path.join(userData, 'versions.cache.json'));
+  const version = settings.vanillaVersion || latest;
+  if (!version) throw new Error('Не удалось получить список версий Minecraft');
+
+  const javaPath = await ensureJava(
+    await resolveJavaMajor(version, userData),
+    userData,
+    label => emit('progress', { phase: 'java', current: 0, total: 0, label })
+  );
+
+  const opts = buildLaunchOptions({
+    manifest: { minecraft: version, files: [] },
+    auth,
+    memoryMb: settings.memoryMb,
+    root: path.join(userData, 'vanilla'),
+    javaPath
+  });
+  await launchClient(opts, emit);
+}
+
+async function playPack({ config, settings, auth, paths, emit }) {
   const { userData } = paths;
   const root = settings.gameDir || path.join(userData, 'game');
 
@@ -34,7 +73,7 @@ async function play({ config, settings, auth, paths, emit }) {
   }
 
   const javaPath = await ensureJava(
-    requiredJavaMajor(manifest.minecraft),
+    await resolveJavaMajor(manifest.minecraft, userData),
     userData,
     label => emit('progress', { phase: 'java', current: 0, total: 0, label })
   );
@@ -57,7 +96,10 @@ async function play({ config, settings, auth, paths, emit }) {
     customVersion,
     forgeInstaller
   });
+  await launchClient(opts, emit);
+}
 
+async function launchClient(opts, emit) {
   emit('state', { value: 'launching' });
   const launcher = new Client();
   const logTail = [];
