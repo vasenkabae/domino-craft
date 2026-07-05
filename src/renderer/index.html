@@ -63,12 +63,52 @@
 </div>
 
 <div id="settings-modal" class="modal hidden">
-  <div class="modal-card">
+  <div class="modal-card settings">
     <h2>Настройки</h2>
-    <label class="field">
-      Память для игры: <b id="mem-label"></b>
-      <input type="range" id="mem" min="2048" max="16384" step="1024">
-    </label>
+
+    <div class="set-scroll">
+      <label class="field">
+        Память для игры: <b id="mem-label"></b>
+        <input type="range" id="mem" min="2048" max="16384" step="1024">
+      </label>
+
+      <div class="field">
+        <span>Разрешение окна игры</span>
+        <div class="row">
+          <input type="number" id="res-w" min="640" step="1" class="num">
+          <span class="times">×</span>
+          <input type="number" id="res-h" min="480" step="1" class="num">
+          <label class="check inline">
+            <input type="checkbox" id="fullscreen"> Полный экран
+          </label>
+        </div>
+      </div>
+
+      <label class="field">
+        После запуска игры
+        <select id="after-launch">
+          <option value="minimize">Свернуть лаунчер</option>
+          <option value="keep">Оставить открытым</option>
+          <option value="close">Закрыть лаунчер</option>
+        </select>
+      </label>
+
+      <div class="field">
+        <span>Папка игры</span>
+        <div class="row">
+          <input type="text" id="game-dir" class="grow" placeholder="По умолчанию" readonly>
+          <button id="btn-choose-dir" class="small">Выбрать</button>
+          <button id="btn-reset-dir" class="small">Сброс</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span>Оформление</span>
+        <label class="check"><input type="checkbox" id="opt-dominoes"> Падающие домино на фоне</label>
+        <label class="check"><input type="checkbox" id="opt-sounds"> Звуки интерфейса</label>
+      </div>
+    </div>
+
     <div class="modal-buttons">
       <button id="btn-logout">Выйти из аккаунта</button>
       <button id="btn-close-settings" class="primary">Готово</button>

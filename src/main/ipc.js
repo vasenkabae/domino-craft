@@ -1,4 +1,4 @@
-const { app, ipcMain } = require('electron');
+const { app, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs/promises');
 const config = require('../../launcher.config.json');
@@ -52,6 +52,11 @@ function registerIpc(win) {
 
   ipcMain.handle('save-settings', (_e, patch) => saveSettings(settingsFile, patch));
 
+  ipcMain.handle('choose-dir', async () => {
+    const res = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
+    return res.canceled ? null : res.filePaths[0];
+  });
+
   ipcMain.handle('server-status', async () => {
     try {
       const { manifest } = await fetchManifest(config.manifestUrl, manifestCache);
@@ -89,6 +94,9 @@ function registerIpc(win) {
       }
       const settings = await loadSettings(settingsFile);
       await play({ config, settings, auth, paths: { userData }, emit });
+      // Что делать с лаунчером после старта игры
+      if (settings.afterLaunch === 'close') app.quit();
+      else if (settings.afterLaunch === 'minimize' && !win.isDestroyed()) win.minimize();
     } catch (e) {
       emit('state', { value: 'error', message: e.message });
     } finally {

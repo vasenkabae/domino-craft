@@ -50,4 +50,25 @@ describe('buildLaunchOptions', () => {
     const opts = buildLaunchOptions({ ...base, manifest: { minecraft: '1.20.1', files: [] } });
     expect(opts.memory.max).toBe('4096M');
   });
+  it('разрешение окна', () => {
+    const opts = buildLaunchOptions({
+      ...base,
+      manifest: { minecraft: '1.20.1', files: [] },
+      resolution: { width: 1280, height: 720 }
+    });
+    expect(opts.window).toEqual({ width: 1280, height: 720 });
+  });
+  it('полный экран важнее разрешения', () => {
+    const opts = buildLaunchOptions({
+      ...base,
+      manifest: { minecraft: '1.20.1', files: [] },
+      fullscreen: true,
+      resolution: { width: 1280, height: 720 }
+    });
+    expect(opts.window).toEqual({ fullscreen: true });
+  });
+  it('без window-опций, если ничего не задано', () => {
+    const opts = buildLaunchOptions({ ...base, manifest: { minecraft: '1.20.1', files: [] } });
+    expect(opts.window).toBeUndefined();
+  });
 });

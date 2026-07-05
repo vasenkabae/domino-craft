@@ -1,7 +1,18 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const DEFAULTS = { memoryMb: 4096, mode: 'pack', vanillaVersion: null };
+const DEFAULTS = {
+  memoryMb: 4096,
+  mode: 'pack',
+  vanillaVersion: null,
+  gameDir: null,
+  fullscreen: false,
+  resWidth: 854,
+  resHeight: 480,
+  afterLaunch: 'minimize', // 'keep' | 'minimize' | 'close'
+  dominoes: true,
+  sounds: true
+};
 
 async function loadSettings(file) {
   try {

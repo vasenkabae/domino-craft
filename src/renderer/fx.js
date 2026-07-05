@@ -1,8 +1,10 @@
 // Эффекты лаунчера: звук кнопок и падающие домино на фоне.
 (() => {
+  // Управление эффектами (переключается из настроек)
+  const fxControl = { sounds: true, dominoes: true };
+  window.fxControl = fxControl;
+
   // ---------- Звук (WebAudio, без файлов) ----------
-  // Тёплый деревянный «тук»: короткий шумовой импульс сквозь резонансный
-  // полосовой фильтр + мягкая синусовая «тушка» — звучит как костяшка, а не пищалка.
   let actx = null;
   let noiseBuf = null;
   const audio = () => (actx ||= new (window.AudioContext || window.webkitAudioContext)());
@@ -10,7 +12,7 @@
   function noise() {
     const a = audio();
     if (!noiseBuf) {
-      noiseBuf = a.createBuffer(1, a.sampleRate * 0.3, a.sampleRate);
+      noiseBuf = a.createBuffer(1, a.sampleRate * 0.1, a.sampleRate);
       const d = noiseBuf.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     }
@@ -19,52 +21,44 @@
     return src;
   }
 
-  // freq — «дерево» тона удара, dur — длительность, vol — громкость
-  function woodHit(freq, dur, vol, q = 7) {
+  // Мягкий щелчок: короткий приглушённый импульс шума + лёгкая округлая «подушка».
+  function softClick() {
+    if (!fxControl.sounds) return;
     try {
       const a = audio();
       const t = a.currentTime;
 
-      // резонансный щелчок из шума
       const src = noise();
+      const hp = a.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 600;
       const bp = a.createBiquadFilter();
       bp.type = 'bandpass';
-      bp.frequency.value = freq;
-      bp.Q.value = q;
+      bp.frequency.value = 1700;
+      bp.Q.value = 1.2;
       const g1 = a.createGain();
-      g1.gain.setValueAtTime(vol, t);
-      g1.gain.exponentialRampToValueAtTime(0.0008, t + dur);
-      src.connect(bp).connect(g1).connect(a.destination);
+      g1.gain.setValueAtTime(0.0001, t);
+      g1.gain.linearRampToValueAtTime(0.12, t + 0.004);
+      g1.gain.exponentialRampToValueAtTime(0.0005, t + 0.05);
+      src.connect(hp).connect(bp).connect(g1).connect(a.destination);
       src.start(t);
-      src.stop(t + dur);
+      src.stop(t + 0.06);
 
-      // низкая синусовая «тушка» для тепла
       const osc = a.createOscillator();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq * 0.6, t);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.42, t + dur);
+      osc.frequency.value = 440;
       const g2 = a.createGain();
-      g2.gain.setValueAtTime(vol * 0.5, t);
-      g2.gain.exponentialRampToValueAtTime(0.0008, t + dur * 0.8);
+      g2.gain.setValueAtTime(0.05, t);
+      g2.gain.exponentialRampToValueAtTime(0.0005, t + 0.045);
       osc.connect(g2).connect(a.destination);
       osc.start(t);
-      osc.stop(t + dur);
+      osc.stop(t + 0.06);
     } catch { /* звук не критичен */ }
   }
 
-  // Клик по кнопке — мягкий деревянный «ток»
   document.addEventListener('click', e => {
-    if (e.target.closest('button')) woodHit(420, 0.13, 0.32, 6);
+    if (e.target.closest('button')) softClick();
   }, true);
-
-  // Стук костяшки при смахивании — ниже и глуше (не чаще раза в 110 мс)
-  let lastKnock = 0;
-  function knock() {
-    const now = performance.now();
-    if (now - lastKnock < 110) return;
-    lastKnock = now;
-    woodHit(240 + Math.random() * 60, 0.16, 0.22, 5);
-  }
 
   // ---------- Падающие домино ----------
   const canvas = document.getElementById('fx');
@@ -168,7 +162,6 @@
 
   function step() {
     g.clearRect(0, 0, W, H);
-    const flick = Math.hypot(mouse.dx, mouse.dy);
     for (let i = 0; i < tiles.length; i++) {
       const t = tiles[i];
 
@@ -180,7 +173,6 @@
         t.vx += mouse.dx * 0.14 * k + ((t.x - mouse.x) / Math.max(dist, 1)) * 0.7 * k;
         t.vy += mouse.dy * 0.14 * k + ((t.y - mouse.y) / Math.max(dist, 1)) * 0.7 * k;
         t.va += (mouse.dx * 0.0006 + (Math.random() - 0.5) * 0.02) * k;
-        if (flick > 16) knock();
       }
 
       t.vy += 0.007;                   // гравитация (мягкая)
@@ -196,7 +188,25 @@
     }
     mouse.dx = 0;
     mouse.dy = 0;
-    requestAnimationFrame(step);
+    rafId = requestAnimationFrame(step);
   }
-  step();
+
+  let rafId = null;
+  function startDominoes() {
+    canvas.style.display = '';
+    if (!rafId) rafId = requestAnimationFrame(step);
+  }
+  function stopDominoes() {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    g.clearRect(0, 0, W, H);
+    canvas.style.display = 'none';
+  }
+
+  fxControl.setSounds = v => { fxControl.sounds = !!v; };
+  fxControl.setDominoes = v => {
+    fxControl.dominoes = !!v;
+    if (v) startDominoes(); else stopDominoes();
+  };
+
+  startDominoes();
 })();
