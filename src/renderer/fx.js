@@ -1,38 +1,69 @@
 // Эффекты лаунчера: звук кнопок и падающие домино на фоне.
 (() => {
   // ---------- Звук (WebAudio, без файлов) ----------
+  // Тёплый деревянный «тук»: короткий шумовой импульс сквозь резонансный
+  // полосовой фильтр + мягкая синусовая «тушка» — звучит как костяшка, а не пищалка.
   let actx = null;
+  let noiseBuf = null;
   const audio = () => (actx ||= new (window.AudioContext || window.webkitAudioContext)());
 
-  function blip(freqFrom, freqTo, dur, vol, type = 'triangle') {
+  function noise() {
+    const a = audio();
+    if (!noiseBuf) {
+      noiseBuf = a.createBuffer(1, a.sampleRate * 0.3, a.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = a.createBufferSource();
+    src.buffer = noiseBuf;
+    return src;
+  }
+
+  // freq — «дерево» тона удара, dur — длительность, vol — громкость
+  function woodHit(freq, dur, vol, q = 7) {
     try {
       const a = audio();
       const t = a.currentTime;
+
+      // резонансный щелчок из шума
+      const src = noise();
+      const bp = a.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = freq;
+      bp.Q.value = q;
+      const g1 = a.createGain();
+      g1.gain.setValueAtTime(vol, t);
+      g1.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+      src.connect(bp).connect(g1).connect(a.destination);
+      src.start(t);
+      src.stop(t + dur);
+
+      // низкая синусовая «тушка» для тепла
       const osc = a.createOscillator();
-      const gain = a.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freqFrom, t);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(freqTo, 1), t + dur);
-      gain.gain.setValueAtTime(vol, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-      osc.connect(gain).connect(a.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq * 0.6, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.42, t + dur);
+      const g2 = a.createGain();
+      g2.gain.setValueAtTime(vol * 0.5, t);
+      g2.gain.exponentialRampToValueAtTime(0.0008, t + dur * 0.8);
+      osc.connect(g2).connect(a.destination);
       osc.start(t);
       osc.stop(t + dur);
     } catch { /* звук не критичен */ }
   }
 
-  // Клик по любой кнопке — короткий приятный «пок»
+  // Клик по кнопке — мягкий деревянный «ток»
   document.addEventListener('click', e => {
-    if (e.target.closest('button')) blip(560, 170, 0.09, 0.16);
+    if (e.target.closest('button')) woodHit(420, 0.13, 0.32, 6);
   }, true);
 
-  // Стук костяшки при сильном смахивании (не чаще раза в 90 мс)
+  // Стук костяшки при смахивании — ниже и глуше (не чаще раза в 110 мс)
   let lastKnock = 0;
   function knock() {
     const now = performance.now();
-    if (now - lastKnock < 90) return;
+    if (now - lastKnock < 110) return;
     lastKnock = now;
-    blip(200, 60, 0.05, 0.08, 'square');
+    woodHit(240 + Math.random() * 60, 0.16, 0.22, 5);
   }
 
   // ---------- Падающие домино ----------
@@ -61,10 +92,10 @@
       w, h: w * 2,
       x: Math.random() * W,
       y: above ? -w * 2 - Math.random() * H * 0.6 : Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: 0.3 + Math.random() * 0.8,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: 0.12 + Math.random() * 0.35,
       a: Math.random() * Math.PI * 2,
-      va: (Math.random() - 0.5) * 0.012,
+      va: (Math.random() - 0.5) * 0.006,
       p1: 1 + Math.floor(Math.random() * 6),
       p2: 1 + Math.floor(Math.random() * 6)
     };
@@ -152,10 +183,10 @@
         if (flick > 16) knock();
       }
 
-      t.vy += 0.02;                    // гравитация
+      t.vy += 0.007;                   // гравитация (мягкая)
       t.vx *= 0.99;
       t.va *= 0.995;
-      if (t.vy > 7) t.vy = 7;
+      if (t.vy > 2.6) t.vy = 2.6;      // потолок скорости падения
       t.x += t.vx;
       t.y += t.vy;
       t.a += t.va;
