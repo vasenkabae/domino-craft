@@ -2,6 +2,9 @@ const $ = id => document.getElementById(id);
 
 let settings = { memoryMb: 4096 };
 let running = false;
+let friendsData = { friends: [], watchedServers: [] };
+let presenceByNick = {}; // ник(в нижнем регистре) -> { online, server }
+let serversByLabel = {}; // ярлык сервера -> { host, port, ... }
 
 init();
 
@@ -98,6 +101,12 @@ async function init() {
   $('btn-close-error').onclick = () => $('error-modal').classList.add('hidden');
   $('btn-copy-error').onclick = () => navigator.clipboard.writeText($('error-text').textContent);
 
+  $('btn-friends').onclick = openFriends;
+  $('btn-close-friends').onclick = () => $('friends-modal').classList.add('hidden');
+  $('btn-add-friend').onclick = addFriendFromInput;
+  $('friend-nick').onkeydown = e => { if (e.key === 'Enter') addFriendFromInput(); };
+  launcher.onPresence(applyPresence);
+
   launcher.onProgress(p => {
     const label = p.phase === 'sync' ? `Сборка: ${p.label} (${p.current}/${p.total})`
       : p.phase === 'java' ? p.label
@@ -187,6 +196,91 @@ async function refreshNews() {
     p.textContent = n.text || '';
     el.append(date, h, p);
     box.append(el);
+  }
+}
+
+async function openFriends() {
+  friendsData = await launcher.friendsList();
+  renderFriends();
+  $('friends-modal').classList.remove('hidden');
+}
+
+async function addFriendFromInput() {
+  const nick = $('friend-nick').value.trim();
+  if (!nick) return;
+  friendsData = await launcher.friendsAdd(nick);
+  $('friend-nick').value = '';
+  renderFriends();
+}
+
+// Раскладываем событие presence в удобные карты и, если модалка открыта, перерисовываем
+function applyPresence(p) {
+  presenceByNick = {};
+  for (const f of p.friends) presenceByNick[f.nick.toLowerCase()] = f;
+  serversByLabel = {};
+  for (const s of p.servers) serversByLabel[s.label] = s;
+  if (!$('friends-modal').classList.contains('hidden')) renderFriends();
+}
+
+function renderFriends() {
+  const box = $('friends-list');
+  box.innerHTML = '';
+  if (!friendsData.friends.length) {
+    const empty = document.createElement('div');
+    empty.className = 'friends-empty';
+    empty.textContent = 'Пока никого. Добавь друга по нику выше.';
+    box.append(empty);
+    return;
+  }
+  for (const f of friendsData.friends) {
+    const pres = presenceByNick[f.nick.toLowerCase()];
+    const online = !!(pres && pres.online);
+    const row = document.createElement('div');
+    row.className = 'friend-row' + (online ? ' online' : '');
+
+    const dot = document.createElement('span');
+    dot.className = 'friend-dot';
+
+    const name = document.createElement('span');
+    name.className = 'friend-name';
+    name.textContent = f.nick; // только textContent — ник не рендерим как HTML
+
+    const meta = document.createElement('span');
+    meta.className = 'friend-meta';
+    meta.textContent = online ? `на «${pres.server}»` : 'оффлайн';
+
+    const spacer = document.createElement('span');
+    spacer.className = 'spacer';
+
+    row.append(dot, name, meta, spacer);
+
+    if (online) {
+      const srv = serversByLabel[pres.server];
+      if (srv && srv.host) {
+        const copy = document.createElement('button');
+        copy.className = 'friend-copy';
+        copy.textContent = 'Копировать адрес';
+        copy.onclick = () => {
+          const addr = (srv.port && srv.port !== 25565) ? `${srv.host}:${srv.port}` : srv.host;
+          navigator.clipboard.writeText(addr);
+          copy.textContent = 'Скопировано';
+          setTimeout(() => { copy.textContent = 'Копировать адрес'; }, 1200);
+        };
+        row.append(copy);
+      }
+    }
+
+    const rm = document.createElement('button');
+    rm.className = 'friend-remove';
+    rm.textContent = '✕';
+    rm.title = 'Удалить';
+    rm.onclick = async () => {
+      friendsData = await launcher.friendsRemove(f.nick);
+      renderFriends();
+    };
+    row.append(rm);
+
+    box.append(row);
   }
 }
 

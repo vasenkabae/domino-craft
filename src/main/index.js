@@ -47,6 +47,12 @@ app.whenReady().then(() => {
             );
             await new Promise(r => setTimeout(r, 300));
           }
+          if (process.argv.includes('--open-friends')) {
+            await win.webContents.executeJavaScript(
+              "document.getElementById('btn-friends')?.click()"
+            );
+            await new Promise(r => setTimeout(r, 300));
+          }
           win.moveTop();
           win.focus();
           const img = await win.webContents.capturePage();
