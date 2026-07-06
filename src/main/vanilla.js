@@ -27,4 +27,23 @@ async function getVersionJavaMajor(versionId, cachePath) {
   return (json.javaVersion && json.javaVersion.majorVersion) || null;
 }
 
-module.exports = { parseReleases, getVanillaVersions, getVersionJavaMajor, VERSIONS_URL };
+// Ссылка и sha1 серверного jar конкретной версии (downloads.server из JSON Mojang).
+// null — если версия не найдена, нет сети или у версии нет серверного jar.
+async function getServerDownload(versionId, cachePath) {
+  const { manifest } = await fetchManifest(VERSIONS_URL, cachePath);
+  const entry = (manifest.versions || []).find(v => v.id === versionId);
+  if (!entry || !entry.url) return null;
+  const res = await fetch(entry.url);
+  if (!res.ok) return null;
+  const json = await res.json();
+  const server = json.downloads && json.downloads.server;
+  return server ? { url: server.url, sha1: server.sha1 } : null;
+}
+
+module.exports = {
+  parseReleases,
+  getVanillaVersions,
+  getVersionJavaMajor,
+  getServerDownload,
+  VERSIONS_URL
+};

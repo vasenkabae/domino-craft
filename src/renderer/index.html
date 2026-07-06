@@ -38,6 +38,7 @@
     <div class="server-chip offline" id="server-chip">Сервер: проверяем…</div>
     <div class="user">
       <span id="user-name"></span>
+      <button id="btn-host" class="icon" title="Хостить сервер с ПК">🖥</button>
       <button id="btn-friends" class="icon" title="Друзья">👥</button>
       <button id="btn-settings" class="icon" title="Настройки">⚙</button>
     </div>
@@ -74,6 +75,41 @@
     <div id="friends-list" class="friends-list"></div>
     <div class="modal-buttons">
       <button id="btn-close-friends" class="primary">Готово</button>
+    </div>
+  </div>
+</div>
+
+<div id="host-modal" class="modal hidden">
+  <div class="modal-card">
+    <h2>Хостить сервер с ПК</h2>
+    <div class="subtle">Быстрый сервер на твоём ПК для друзей. Играть и хостить одновременно тяжело — лучше мощный ПК и проводной интернет. Заходят только друзья из белого списка.</div>
+
+    <label class="field">
+      Память для сервера: <b id="srvmem-label"></b>
+      <input type="range" id="srvmem" min="1024" max="12288" step="512">
+    </label>
+
+    <label class="check">
+      <input type="checkbox" id="host-eula"> Принимаю EULA Minecraft (aka.ms/MinecraftEULA)
+    </label>
+
+    <div class="host-status">
+      <span id="host-dot" class="friend-dot"></span>
+      <span id="host-status-text">Остановлен</span>
+    </div>
+
+    <div id="host-address-row" class="row hidden">
+      <input id="host-address" class="grow" readonly>
+      <button id="btn-copy-address" class="small">Копировать</button>
+    </div>
+
+    <div id="host-claim" class="host-claim hidden"></div>
+
+    <pre id="host-log" class="host-log"></pre>
+
+    <div class="modal-buttons">
+      <button id="btn-host-toggle" class="primary">Запустить</button>
+      <button id="btn-close-host">Закрыть</button>
     </div>
   </div>
 </div>
