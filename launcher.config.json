@@ -1,6 +1,6 @@
 {
   "name": "Domino Craft",
-  "manifestUrl": "https://raw.githubusercontent.com/CHANGE_ME_GITHUB_LOGIN/domino-modpack/main/manifest.json",
-  "newsUrl": "https://raw.githubusercontent.com/CHANGE_ME_GITHUB_LOGIN/domino-modpack/main/news.json",
+  "manifestUrl": "https://raw.githubusercontent.com/vasenkabae/domino-modpack/main/manifest.json",
+  "newsUrl": "https://raw.githubusercontent.com/vasenkabae/domino-modpack/main/news.json",
   "azureClientId": null
 }
