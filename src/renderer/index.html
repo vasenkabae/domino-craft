@@ -38,6 +38,7 @@
     <div class="server-chip offline" id="server-chip">Сервер: проверяем…</div>
     <div class="user">
       <span id="user-name"></span>
+      <button id="btn-friends" class="icon" title="Друзья">👥</button>
       <button id="btn-settings" class="icon" title="Настройки">⚙</button>
     </div>
   </header>
@@ -60,6 +61,21 @@
     </div>
     <button id="btn-play" class="primary big">ИГРАТЬ</button>
   </footer>
+</div>
+
+<div id="friends-modal" class="modal hidden">
+  <div class="modal-card">
+    <h2>Друзья</h2>
+    <div class="row">
+      <input id="friend-nick" class="grow" placeholder="Ник друга" maxlength="16" spellcheck="false">
+      <button id="btn-add-friend" class="small">Добавить</button>
+    </div>
+    <div id="friends-hint" class="subtle">Видно, кто из друзей сейчас на наших серверах.</div>
+    <div id="friends-list" class="friends-list"></div>
+    <div class="modal-buttons">
+      <button id="btn-close-friends" class="primary">Готово</button>
+    </div>
+  </div>
 </div>
 
 <div id="settings-modal" class="modal hidden">
