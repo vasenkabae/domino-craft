@@ -40,7 +40,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "CHANGE_ME_GITHUB_LOGIN",
+      "owner": "vasenkabae",
       "repo": "domino-craft"
     }
   }
