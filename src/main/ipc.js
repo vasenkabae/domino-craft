@@ -10,6 +10,10 @@ const { fetchManifest } = require('./manifest');
 const { play } = require('./game');
 const { loadFriends, addFriend, removeFriend, addWatched, removeWatched } = require('./friends');
 const { pollPresence } = require('./presence');
+const { HostServer, prepareServerFiles } = require('./host-server');
+const { ensurePlayit, PlayitTunnel } = require('./tunnel');
+const { pickPort } = require('./host-config');
+const net = require('net');
 
 function registerIpc(win) {
   const userData = app.getPath('userData');
@@ -122,6 +126,85 @@ function registerIpc(win) {
     return s;
   });
   ipcMain.handle('friends:watch-remove', (_e, server) => removeWatched(friendsFile, server));
+
+  // --- Хостинг сервера с ПК (playit.gg) ---
+  const hostDir = path.join(userData, 'host-server');
+  const playitBin = path.join(userData, 'playit', 'playit.exe');
+  let hostServer = null;
+  let tunnel = null;
+
+  const isPortFree = port => new Promise(resolve => {
+    const s = net.createServer();
+    s.once('error', () => resolve(false));
+    s.once('listening', () => s.close(() => resolve(true)));
+    s.listen(port, '0.0.0.0');
+  });
+
+  const stopTunnel = () => { if (tunnel) { tunnel.stop(); tunnel = null; } };
+
+  // Туннель поднимаем только когда сервер готов принимать игроков.
+  async function startTunnel() {
+    if (tunnel) return;
+    try {
+      emit('host:log', 'Запуск туннеля playit…');
+      await ensurePlayit(playitBin);
+      tunnel = new PlayitTunnel();
+      tunnel.on('claim', u => emit('host:claim', u));
+      tunnel.on('address', a => emit('host:address', a));
+      tunnel.on('log', l => emit('host:log', '[playit] ' + l));
+      tunnel.start(playitBin);
+    } catch (e) {
+      tunnel = null;
+      emit('host:log', 'Туннель не поднялся: ' + e.message + ' — сервер доступен по локальной сети');
+    }
+  }
+
+  ipcMain.handle('host:state', () => ({
+    status: hostServer ? hostServer.status : 'idle',
+    address: tunnel ? tunnel.address : null
+  }));
+
+  ipcMain.handle('host:stop', async () => {
+    stopTunnel();
+    if (hostServer) { await hostServer.stop(); hostServer = null; }
+    emit('host:status', 'idle');
+    return true;
+  });
+
+  ipcMain.handle('host:start', async (_e, opts = {}) => {
+    if (hostServer) return; // уже запущен
+    try {
+      emit('host:status', 'preparing');
+      const settings = await loadSettings(settingsFile);
+      const { manifest } = await fetchManifest(config.manifestUrl, manifestCache);
+      const session = await readSession();
+      const state = await loadFriends(friendsFile);
+      const nicks = [session && session.name, ...state.friends.map(f => f.nick)].filter(Boolean);
+      const port = await pickPort(25565, isPortFree);
+
+      const prep = await prepareServerFiles({
+        manifest, userData, dir: hostDir, nicks,
+        motd: config.name, port, eulaAccepted: !!opts.eulaAccepted,
+        onProgress: label => emit('host:log', label)
+      });
+
+      hostServer = new HostServer();
+      hostServer.on('status', async s => {
+        emit('host:status', s);
+        if (s === 'ready') startTunnel();
+      });
+      hostServer.on('log', l => emit('host:log', l));
+      hostServer.on('exit', () => { stopTunnel(); hostServer = null; emit('host:status', 'idle'); });
+      hostServer.start({ ...prep, memoryMb: settings.serverMemoryMb || 2048 });
+    } catch (e) {
+      emit('host:status', 'idle');
+      emit('host:error', e.message);
+      if (hostServer) { try { await hostServer.stop(); } catch { /* */ } hostServer = null; }
+      stopTunnel();
+    }
+  });
+
+  win.on('closed', () => { stopTunnel(); if (hostServer) hostServer.stop().catch(() => {}); });
 
   // Разрешаем адрес платного сервера один раз — он редко меняется
   async function resolvePaidServer() {
