@@ -16,15 +16,27 @@ async function extractZip(zipPath, dir) {
 
 // Эвристика на случай, когда JSON Mojang недоступен (точное значение
 // берётся из javaVersion в getVersionJavaMajor). Для схемы 1.x.y:
-// 1.20.5+ → 21, 1.17+ → 17, старее → 8. Новая схема (25.x+) → 21.
+// 1.20.5+ → 21, 1.17+ → 17, старее → 8. Новая схема: 25.x → 21, 26+ → 25
+// (26.2 требует Java 25 — проверено боем, class file 69).
 function requiredJavaMajor(mcVersion) {
   const parts = mcVersion.split('.').map(n => parseInt(n, 10) || 0);
-  if (parts[0] !== 1) return 21;
+  if (parts[0] !== 1) return parts[0] >= 26 ? 25 : 21;
   const minor = parts[1] || 0;
   const patch = parts[2] || 0;
   if (minor > 20 || (minor === 20 && patch >= 5)) return 21;
   if (minor >= 17) return 17;
   return 8;
+}
+
+// Точная Java из данных Mojang, при недоступности — эвристика по номеру версии.
+// Используется и клиентом (game.js), и сервером с ПК (host-server.js).
+async function resolveJavaMajor(mcVersion, userData) {
+  const { getVersionJavaMajor } = require('./vanilla');
+  const exact = await getVersionJavaMajor(
+    mcVersion,
+    path.join(userData, 'versions.cache.json')
+  ).catch(() => null);
+  return exact || requiredJavaMajor(mcVersion);
 }
 
 // Скачивает JRE Adoptium (Temurin) в userData/runtime и возвращает путь к javaw.exe.
@@ -64,4 +76,4 @@ function findJavaw(dir) {
   return null;
 }
 
-module.exports = { requiredJavaMajor, ensureJava };
+module.exports = { requiredJavaMajor, resolveJavaMajor, ensureJava };

@@ -4,19 +4,10 @@ const { Client } = require('minecraft-launcher-core');
 const { fetchManifest } = require('./manifest');
 const { planSync, buildLocalIndex } = require('./sync');
 const { downloadFile } = require('./downloader');
-const { requiredJavaMajor, ensureJava } = require('./java');
+const { resolveJavaMajor, ensureJava } = require('./java');
 const { ensureFabric, ensureForge } = require('./loaders');
 const { buildLaunchOptions } = require('./launch-options');
-const { getVanillaVersions, getVersionJavaMajor } = require('./vanilla');
-
-// Точная Java из данных Mojang, при недоступности — эвристика по номеру версии.
-async function resolveJavaMajor(mcVersion, userData) {
-  const exact = await getVersionJavaMajor(
-    mcVersion,
-    path.join(userData, 'versions.cache.json')
-  ).catch(() => null);
-  return exact || requiredJavaMajor(mcVersion);
-}
+const { getVanillaVersions } = require('./vanilla');
 
 // Полный цикл запуска. Режим из настроек: 'pack' — наш сервер со сборкой,
 // 'vanilla' — обычный Minecraft выбранной версии (отдельная папка, без модов).
