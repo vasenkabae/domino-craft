@@ -3,7 +3,6 @@ const path = require('path');
 
 const DEFAULTS = {
   memoryMb: 4096,
-  serverMemoryMb: 2048, // отдельная память для сервера, поднятого с ПК
   mode: 'pack',
   vanillaVersion: null,
   gameDir: null,
