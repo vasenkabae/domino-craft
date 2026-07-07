@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { EventEmitter } from 'events';
-import { HostServer, buildServerArgs } from '../src/main/host-server';
+import { HostServer, buildServerArgs, fabricServerJarUrl } from '../src/main/host-server';
 
 describe('buildServerArgs', () => {
   it('строит аргументы java с памятью и nogui', () => {
@@ -9,6 +9,13 @@ describe('buildServerArgs', () => {
     expect(args).toContain('-jar');
     expect(args).toContain('server.jar');
     expect(args).toContain('nogui');
+  });
+});
+
+describe('fabricServerJarUrl', () => {
+  it('включает игру, загрузчик и установщик в путь', () => {
+    expect(fabricServerJarUrl('26.2', '0.19.3', '1.1.1'))
+      .toBe('https://meta.fabricmc.net/v2/versions/loader/26.2/0.19.3/1.1.1/server/jar');
   });
 });
 
