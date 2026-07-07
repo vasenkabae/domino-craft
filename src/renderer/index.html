@@ -103,9 +103,17 @@
       <span id="host-status-text">Остановлен</span>
     </div>
 
-    <div id="host-address-row" class="row hidden">
-      <input id="host-address" class="grow" readonly>
-      <button id="btn-copy-address" class="small">Копировать</button>
+    <div id="host-selfhint" class="subtle hidden">
+      Ты заходишь так: в игре <b>Сетевая игра → Прямое подключение</b>, адрес <b>localhost</b>
+    </div>
+
+    <div id="host-address-row" class="hidden">
+      <div class="subtle">Адрес для друзей — скопируй и пришли в Discord:</div>
+      <div class="row">
+        <input id="host-address" class="grow" readonly>
+        <button id="btn-copy-address" class="small">Копировать</button>
+      </div>
+      <div class="subtle">Друг вводит его в <b>Сетевая игра → Прямое подключение</b> (та же версия сервера, и его ник должен быть у тебя в «Друзьях» 👥 до запуска).</div>
     </div>
 
     <div id="host-claim" class="host-claim hidden"></div>

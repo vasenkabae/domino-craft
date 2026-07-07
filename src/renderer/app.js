@@ -372,7 +372,12 @@ function applyHostStatus(status) {
   btn.textContent = hostStatus === 'idle' ? 'Запустить' : 'Остановить';
   btn.disabled = hostStatus === 'preparing' || hostStatus === 'stopping';
   $('host-version').disabled = hostStatus !== 'idle'; // версию не сменить на лету
-  if (hostStatus === 'idle') $('host-address-row').classList.add('hidden');
+  // Подсказка «ты заходишь по localhost» — как только сервер готов
+  $('host-selfhint').classList.toggle('hidden', hostStatus !== 'ready');
+  if (hostStatus === 'idle') {
+    $('host-address-row').classList.add('hidden');
+    $('host-selfhint').classList.add('hidden');
+  }
 }
 
 function appendHostLog(line) {
