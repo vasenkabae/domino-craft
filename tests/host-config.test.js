@@ -4,7 +4,8 @@ import {
   whitelistJson,
   isReadyLine,
   parsePlayitAddress,
-  pickPort
+  pickPort,
+  hostProfileDir
 } from '../src/main/host-config';
 import { offlineUuid } from '../src/main/offline-auth';
 
@@ -66,6 +67,15 @@ describe('parsePlayitAddress', () => {
   });
   it('нет адреса — null', () => {
     expect(parsePlayitAddress('starting agent...')).toBe(null);
+  });
+});
+
+describe('hostProfileDir', () => {
+  it('сборка — в базовой папке', () => {
+    expect(hostProfileDir('C:/data/host-server', null)).toBe('C:/data/host-server');
+  });
+  it('ванильная версия — в своей папке', () => {
+    expect(hostProfileDir('C:/data/host-server', '25.1')).toBe('C:/data/host-server-vanilla-25.1');
   });
 });
 

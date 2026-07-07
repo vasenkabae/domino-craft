@@ -45,6 +45,12 @@ function parsePlayitAddress(line) {
   return m[2] ? `${m[1]}:${m[2]}` : m[1];
 }
 
+// Папка сервера под профиль: сборка живёт в базовой, ванильные версии — каждая в своей
+// (мир, сохранённый новой версией, старой уже не открыть — не смешиваем).
+function hostProfileDir(baseDir, version) {
+  return version ? `${baseDir}-vanilla-${version}` : baseDir;
+}
+
 // Ищет свободный порт начиная с preferred (isFree(port) -> Promise<bool>).
 async function pickPort(preferred, isFree) {
   for (let p = preferred; p < preferred + 20; p++) {
@@ -53,4 +59,4 @@ async function pickPort(preferred, isFree) {
   throw new Error('Не найден свободный порт рядом с ' + preferred);
 }
 
-module.exports = { serverProperties, whitelistJson, isReadyLine, parsePlayitAddress, pickPort };
+module.exports = { serverProperties, whitelistJson, isReadyLine, parsePlayitAddress, pickPort, hostProfileDir };

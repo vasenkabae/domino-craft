@@ -307,10 +307,28 @@ function renderFriends() {
   }
 }
 
+let hostVersionsLoaded = false;
+
 async function openHost() {
   const mem = settings.serverMemoryMb || 2048;
   $('srvmem').value = mem;
   $('srvmem-label').textContent = fmtMem(mem);
+  if (!hostVersionsLoaded) {
+    hostVersionsLoaded = true;
+    const sel = $('host-version');
+    sel.innerHTML = '';
+    const packOpt = document.createElement('option');
+    packOpt.value = '';
+    packOpt.textContent = 'Наша сборка (как у всех)';
+    sel.append(packOpt);
+    const { releases } = await launcher.vanillaVersions();
+    for (const id of releases) {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = 'Ванилла ' + id;
+      sel.append(opt);
+    }
+  }
   const st = await launcher.hostState();
   applyHostStatus(st.status);
   if (st.address) {
@@ -330,7 +348,7 @@ async function onHostToggle() {
     $('host-log').textContent = '';
     $('host-claim').classList.add('hidden');
     $('host-address-row').classList.add('hidden');
-    launcher.hostStart({ eulaAccepted: true });
+    launcher.hostStart({ eulaAccepted: true, version: $('host-version').value || null });
   } else {
     launcher.hostStop();
   }
@@ -353,6 +371,7 @@ function applyHostStatus(status) {
   const btn = $('btn-host-toggle');
   btn.textContent = hostStatus === 'idle' ? 'Запустить' : 'Остановить';
   btn.disabled = hostStatus === 'preparing' || hostStatus === 'stopping';
+  $('host-version').disabled = hostStatus !== 'idle'; // версию не сменить на лету
   if (hostStatus === 'idle') $('host-address-row').classList.add('hidden');
 }
 
