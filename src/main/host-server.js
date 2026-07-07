@@ -4,7 +4,7 @@ const path = require('path');
 const { spawn: realSpawn } = require('child_process');
 const { downloadFile } = require('./downloader');
 const { planSync, buildLocalIndex } = require('./sync');
-const { requiredJavaMajor, ensureJava } = require('./java');
+const { resolveJavaMajor, ensureJava } = require('./java');
 const { getServerDownload } = require('./vanilla');
 const { serverProperties, whitelistJson, isReadyLine } = require('./host-config');
 
@@ -76,7 +76,8 @@ async function prepareServerFiles({ manifest, userData, dir, nicks, motd, port, 
     throw new Error('Хостинг Forge-сервера с ПК пока не поддержан. Для сервера с ПК выбери Fabric.');
   }
 
-  const javaw = await ensureJava(requiredJavaMajor(manifest.minecraft), userData, onProgress);
+  // Точная Java из JSON Mojang — эвристика для сервера фатальна (UnsupportedClassVersionError).
+  const javaw = await ensureJava(await resolveJavaMajor(manifest.minecraft, userData), userData, onProgress);
   const javaExe = path.join(path.dirname(javaw), 'java.exe');
   return { dir, jarName, javaExe };
 }
