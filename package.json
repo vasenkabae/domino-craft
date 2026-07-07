@@ -10,7 +10,8 @@
     "start": "electron .",
     "smoke": "electron . --smoke",
     "test": "vitest run",
-    "dist": "electron-builder --win"
+    "dist": "electron-builder --win",
+    "release": "electron-builder --win --publish always"
   },
   "dependencies": {
     "electron-updater": "^6.3.9",
@@ -41,7 +42,8 @@
     "publish": {
       "provider": "github",
       "owner": "vasenkabae",
-      "repo": "domino-craft"
+      "repo": "domino-craft",
+      "releaseType": "release"
     }
   }
 }
