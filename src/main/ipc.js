@@ -12,7 +12,7 @@ const { loadFriends, addFriend, removeFriend, addWatched, removeWatched } = requ
 const { pollPresence } = require('./presence');
 const { HostServer, prepareServerFiles } = require('./host-server');
 const { ensurePlayit, PlayitTunnel } = require('./tunnel');
-const { pickPort } = require('./host-config');
+const { pickPort, hostProfileDir } = require('./host-config');
 const net = require('net');
 
 function registerIpc(win) {
@@ -176,14 +176,20 @@ function registerIpc(win) {
     try {
       emit('host:status', 'preparing');
       const settings = await loadSettings(settingsFile);
-      const { manifest } = await fetchManifest(config.manifestUrl, manifestCache);
+      // Версия на выбор: без opts.version — наша сборка, с ней — ванильный сервер этой версии.
+      let manifest;
+      if (opts.version) {
+        manifest = { minecraft: opts.version, loader: { type: 'vanilla' }, files: [] };
+      } else {
+        ({ manifest } = await fetchManifest(config.manifestUrl, manifestCache));
+      }
       const session = await readSession();
       const state = await loadFriends(friendsFile);
       const nicks = [session && session.name, ...state.friends.map(f => f.nick)].filter(Boolean);
       const port = await pickPort(25565, isPortFree);
 
       const prep = await prepareServerFiles({
-        manifest, userData, dir: hostDir, nicks,
+        manifest, userData, dir: hostProfileDir(hostDir, opts.version || null), nicks,
         motd: config.name, port, eulaAccepted: !!opts.eulaAccepted,
         onProgress: label => emit('host:log', label)
       });
