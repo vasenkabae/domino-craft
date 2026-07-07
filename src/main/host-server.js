@@ -14,12 +14,27 @@ function buildServerArgs(memoryMb, jarName) {
   return [`-Xmx${memoryMb}M`, `-Xms${xms}M`, '-jar', jarName, 'nogui'];
 }
 
+// URL серверного лаунчер-jar Fabric: в пути обязательна и версия установщика.
+function fabricServerJarUrl(mc, loaderVersion, installerVersion) {
+  return `https://meta.fabricmc.net/v2/versions/loader/${mc}/${loaderVersion}/${installerVersion}/server/jar`;
+}
+
+// Последний стабильный установщик Fabric из meta.
+async function latestFabricInstaller() {
+  const res = await fetch('https://meta.fabricmc.net/v2/versions/installer');
+  if (!res.ok) throw new Error('Fabric meta (installer): HTTP ' + res.status);
+  const list = await res.json();
+  const stable = list.find(v => v.stable) || list[0];
+  if (!stable) throw new Error('Fabric meta: список установщиков пуст');
+  return stable.version;
+}
+
 // Fabric-сервер: единый лаунчер-jar из meta (сам подтянет vanilla-ядро рядом).
 async function installFabricServer(dir, mc, loaderVersion, onProgress) {
   const jarName = 'fabric-server-launch.jar';
   onProgress('Установка Fabric-сервера');
-  const url = `https://meta.fabricmc.net/v2/versions/loader/${mc}/${loaderVersion}/server/jar`;
-  await downloadFile(url, path.join(dir, jarName));
+  const installer = await latestFabricInstaller();
+  await downloadFile(fabricServerJarUrl(mc, loaderVersion, installer), path.join(dir, jarName));
   return jarName;
 }
 
@@ -123,4 +138,4 @@ class HostServer extends EventEmitter {
   }
 }
 
-module.exports = { HostServer, buildServerArgs, prepareServerFiles, installFabricServer };
+module.exports = { HostServer, buildServerArgs, prepareServerFiles, installFabricServer, fabricServerJarUrl };
