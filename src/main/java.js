@@ -29,7 +29,6 @@ function requiredJavaMajor(mcVersion) {
 }
 
 // Точная Java из данных Mojang, при недоступности — эвристика по номеру версии.
-// Используется и клиентом (game.js), и сервером с ПК (host-server.js).
 async function resolveJavaMajor(mcVersion, userData) {
   const { getVersionJavaMajor } = require('./vanilla');
   const exact = await getVersionJavaMajor(

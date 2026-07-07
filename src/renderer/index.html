@@ -38,7 +38,6 @@
     <div class="server-chip offline" id="server-chip">Сервер: проверяем…</div>
     <div class="user">
       <span id="user-name"></span>
-      <button id="btn-host" class="icon" title="Поиграть компанией — временный сервер на твоём ПК">🖥</button>
       <button id="btn-friends" class="icon" title="Друзья">👥</button>
       <button id="btn-settings" class="icon" title="Настройки">⚙</button>
     </div>
@@ -75,54 +74,6 @@
     <div id="friends-list" class="friends-list"></div>
     <div class="modal-buttons">
       <button id="btn-close-friends" class="primary">Готово</button>
-    </div>
-  </div>
-</div>
-
-<div id="host-modal" class="modal hidden">
-  <div class="modal-card">
-    <h2>Поиграть компанией</h2>
-    <div class="subtle">Временный сервер на твоём ПК — если захотелось собраться небольшой компанией ненадолго. Основной сервер это не заменяет. Заходят только друзья из белого списка; мир сохраняется между сессиями. Играть и хостить одновременно тяжело — лучше мощный ПК и проводной интернет.</div>
-
-    <label class="field">
-      Версия сервера
-      <select id="host-version"></select>
-    </label>
-
-    <label class="field">
-      Память для сервера: <b id="srvmem-label"></b>
-      <input type="range" id="srvmem" min="1024" max="12288" step="512">
-    </label>
-
-    <label class="check">
-      <input type="checkbox" id="host-eula"> Принимаю EULA Minecraft (aka.ms/MinecraftEULA)
-    </label>
-
-    <div class="host-status">
-      <span id="host-dot" class="friend-dot"></span>
-      <span id="host-status-text">Остановлен</span>
-    </div>
-
-    <div id="host-selfhint" class="subtle hidden">
-      Ты заходишь так: в игре <b>Сетевая игра → Прямое подключение</b>, адрес <b>localhost</b>
-    </div>
-
-    <div id="host-address-row" class="hidden">
-      <div class="subtle">Адрес для друзей — скопируй и пришли в Discord:</div>
-      <div class="row">
-        <input id="host-address" class="grow" readonly>
-        <button id="btn-copy-address" class="small">Копировать</button>
-      </div>
-      <div class="subtle">Друг вводит его в <b>Сетевая игра → Прямое подключение</b> (та же версия сервера, и его ник должен быть у тебя в «Друзьях» 👥 до запуска).</div>
-    </div>
-
-    <div id="host-claim" class="host-claim hidden"></div>
-
-    <pre id="host-log" class="host-log"></pre>
-
-    <div class="modal-buttons">
-      <button id="btn-host-toggle" class="primary">Запустить</button>
-      <button id="btn-close-host">Закрыть</button>
     </div>
   </div>
 </div>

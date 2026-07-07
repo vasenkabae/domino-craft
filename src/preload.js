@@ -16,15 +16,7 @@ contextBridge.exposeInMainWorld('launcher', {
   friendsRemove: nick => ipcRenderer.invoke('friends:remove', nick),
   friendsWatchAdd: server => ipcRenderer.invoke('friends:watch-add', server),
   friendsWatchRemove: server => ipcRenderer.invoke('friends:watch-remove', server),
-  hostStart: opts => ipcRenderer.invoke('host:start', opts),
-  hostStop: () => ipcRenderer.invoke('host:stop'),
-  hostState: () => ipcRenderer.invoke('host:state'),
   onProgress: cb => ipcRenderer.on('progress', (_e, p) => cb(p)),
   onState: cb => ipcRenderer.on('state', (_e, s) => cb(s)),
-  onPresence: cb => ipcRenderer.on('presence:update', (_e, p) => cb(p)),
-  onHostStatus: cb => ipcRenderer.on('host:status', (_e, s) => cb(s)),
-  onHostLog: cb => ipcRenderer.on('host:log', (_e, l) => cb(l)),
-  onHostAddress: cb => ipcRenderer.on('host:address', (_e, a) => cb(a)),
-  onHostClaim: cb => ipcRenderer.on('host:claim', (_e, u) => cb(u)),
-  onHostError: cb => ipcRenderer.on('host:error', (_e, m) => cb(m))
+  onPresence: cb => ipcRenderer.on('presence:update', (_e, p) => cb(p))
 });

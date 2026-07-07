@@ -375,31 +375,3 @@ button.small { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
 }
 .friend-remove { color: var(--muted); }
 .friend-remove:hover { color: var(--danger); border-color: var(--danger); }
-
-/* ---------- Хостинг с ПК ---------- */
-.host-status { display: flex; align-items: center; gap: 9px; font-size: 14px; color: var(--text); }
-#host-status-text { color: var(--muted); }
-.host-status.ready #host-status-text { color: var(--accent-2); }
-.host-status.ready .friend-dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-.host-status.busy .friend-dot { background: #d9a441; box-shadow: 0 0 8px #d9a441; }
-#host-address { color: var(--accent-2); font-family: ui-monospace, monospace; }
-.host-claim {
-  font-size: 13px; color: #d9a441;
-  background: rgba(217, 164, 65, .1);
-  border: 1px solid rgba(217, 164, 65, .35);
-  border-radius: 8px; padding: 9px 11px;
-  user-select: text;
-}
-.host-log {
-  max-height: 160px; overflow: auto;
-  background: rgba(10, 12, 17, .7);
-  border: 1px solid var(--line);
-  border-radius: 10px; padding: 10px;
-  font-size: 11px; color: #aeb6c6;
-  white-space: pre-wrap; user-select: text;
-  margin: 0;
-}
-.host-log:empty { display: none; }
-.host-log::-webkit-scrollbar { width: 8px; }
-.host-log::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); border-radius: 99px; }
-#host-modal .modal-card { display: flex; flex-direction: column; gap: 16px; }

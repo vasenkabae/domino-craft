@@ -5,7 +5,6 @@ let running = false;
 let friendsData = { friends: [], watchedServers: [] };
 let presenceByNick = {}; // ник(в нижнем регистре) -> { online, server }
 let serversByLabel = {}; // ярлык сервера -> { host, port, ... }
-let hostStatus = 'idle';
 
 init();
 
@@ -107,28 +106,6 @@ async function init() {
   $('btn-add-friend').onclick = addFriendFromInput;
   $('friend-nick').onkeydown = e => { if (e.key === 'Enter') addFriendFromInput(); };
   launcher.onPresence(applyPresence);
-
-  $('btn-host').onclick = openHost;
-  $('btn-close-host').onclick = () => $('host-modal').classList.add('hidden');
-  $('srvmem').oninput = e => { $('srvmem-label').textContent = fmtMem(+e.target.value); };
-  $('btn-host-toggle').onclick = onHostToggle;
-  $('btn-copy-address').onclick = () => {
-    navigator.clipboard.writeText($('host-address').value);
-    $('btn-copy-address').textContent = 'Скопировано';
-    setTimeout(() => { $('btn-copy-address').textContent = 'Копировать'; }, 1200);
-  };
-  launcher.onHostStatus(applyHostStatus);
-  launcher.onHostAddress(a => {
-    $('host-address').value = a;
-    $('host-address-row').classList.remove('hidden');
-  });
-  launcher.onHostClaim(u => {
-    const el = $('host-claim');
-    el.textContent = 'Один раз привяжи playit к своему аккаунту: открой ' + u;
-    el.classList.remove('hidden');
-  });
-  launcher.onHostLog(appendHostLog);
-  launcher.onHostError(m => appendHostLog('Ошибка: ' + m));
 
   launcher.onProgress(p => {
     const label = p.phase === 'sync' ? `Сборка: ${p.label} (${p.current}/${p.total})`
@@ -305,87 +282,6 @@ function renderFriends() {
 
     box.append(row);
   }
-}
-
-let hostVersionsLoaded = false;
-
-async function openHost() {
-  const mem = settings.serverMemoryMb || 2048;
-  $('srvmem').value = mem;
-  $('srvmem-label').textContent = fmtMem(mem);
-  if (!hostVersionsLoaded) {
-    hostVersionsLoaded = true;
-    const sel = $('host-version');
-    sel.innerHTML = '';
-    const packOpt = document.createElement('option');
-    packOpt.value = '';
-    packOpt.textContent = 'Наша сборка (как у всех)';
-    sel.append(packOpt);
-    const { releases } = await launcher.vanillaVersions();
-    for (const id of releases) {
-      const opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = 'Ванилла ' + id;
-      sel.append(opt);
-    }
-  }
-  const st = await launcher.hostState();
-  applyHostStatus(st.status);
-  if (st.address) {
-    $('host-address').value = st.address;
-    $('host-address-row').classList.remove('hidden');
-  }
-  $('host-modal').classList.remove('hidden');
-}
-
-async function onHostToggle() {
-  if (hostStatus === 'idle') {
-    if (!$('host-eula').checked) {
-      appendHostLog('Отметь согласие с EULA Minecraft, чтобы запустить сервер.');
-      return;
-    }
-    settings = await launcher.saveSettings({ serverMemoryMb: +$('srvmem').value });
-    $('host-log').textContent = '';
-    $('host-claim').classList.add('hidden');
-    $('host-address-row').classList.add('hidden');
-    launcher.hostStart({ eulaAccepted: true, version: $('host-version').value || null });
-  } else {
-    launcher.hostStop();
-  }
-}
-
-const HOST_STATUS_TEXT = {
-  idle: 'Остановлен',
-  preparing: 'Готовлю файлы сервера…',
-  starting: 'Запуск сервера…',
-  ready: 'Сервер готов — можно заходить',
-  stopping: 'Останавливаю…'
-};
-
-function applyHostStatus(status) {
-  hostStatus = status || 'idle';
-  $('host-status-text').textContent = HOST_STATUS_TEXT[hostStatus] || hostStatus;
-  const wrap = document.querySelector('.host-status');
-  wrap.classList.toggle('ready', hostStatus === 'ready');
-  wrap.classList.toggle('busy', ['preparing', 'starting', 'stopping'].includes(hostStatus));
-  const btn = $('btn-host-toggle');
-  btn.textContent = hostStatus === 'idle' ? 'Запустить' : 'Остановить';
-  btn.disabled = hostStatus === 'preparing' || hostStatus === 'stopping';
-  $('host-version').disabled = hostStatus !== 'idle'; // версию не сменить на лету
-  // Подсказка «ты заходишь по localhost» — как только сервер готов
-  $('host-selfhint').classList.toggle('hidden', hostStatus !== 'ready');
-  if (hostStatus === 'idle') {
-    $('host-address-row').classList.add('hidden');
-    $('host-selfhint').classList.add('hidden');
-  }
-}
-
-function appendHostLog(line) {
-  const el = $('host-log');
-  el.textContent += (el.textContent ? '\n' : '') + line;
-  const lines = el.textContent.split('\n');
-  if (lines.length > 200) el.textContent = lines.slice(-200).join('\n');
-  el.scrollTop = el.scrollHeight;
 }
 
 function setPlayState(mode, label) {
