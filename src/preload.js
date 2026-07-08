@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('launcher', {
   getState: () => ipcRenderer.invoke('get-state'),
+  accessSubmit: link => ipcRenderer.invoke('access:submit', link),
   loginOffline: nick => ipcRenderer.invoke('login-offline', nick),
   loginMs: () => ipcRenderer.invoke('login-ms'),
   logout: () => ipcRenderer.invoke('logout'),

@@ -16,7 +16,14 @@ async function init() {
   $('title-main').textContent = state.config.name;
   document.title = state.config.name;
 
-  if (state.session) showMain(state.session);
+  // Замок доступа: пока не введена ссылка из Discord — дальше не пускаем
+  if (state.access && state.access.required && !state.access.unlocked) {
+    showGate(state.session);
+  } else if (state.session) {
+    showMain(state.session);
+  } else {
+    $('login').classList.remove('hidden');
+  }
 
   $('btn-offline').onclick = async () => {
     try {
@@ -156,6 +163,24 @@ async function setMode(mode, initial = false) {
     }
     sel.value = settings.vanillaVersion || latest || '';
   }
+}
+
+function showGate(session) {
+  $('login').classList.add('hidden');
+  $('main').classList.add('hidden');
+  $('gate').classList.remove('hidden');
+  const submit = async () => {
+    const r = await launcher.accessSubmit($('gate-link').value);
+    if (r.unlocked) {
+      $('gate').classList.add('hidden');
+      if (session) showMain(session);
+      else $('login').classList.remove('hidden');
+    } else {
+      $('gate-error').textContent = 'Неверная ссылка. Возьми актуальную в нашем Discord.';
+    }
+  };
+  $('btn-gate').onclick = submit;
+  $('gate-link').onkeydown = e => { if (e.key === 'Enter') submit(); };
 }
 
 function showMain(session) {

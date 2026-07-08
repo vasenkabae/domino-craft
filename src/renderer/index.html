@@ -9,7 +9,19 @@
 
 <canvas id="fx"></canvas>
 
-<div id="login" class="screen">
+<div id="gate" class="screen hidden">
+  <div class="login-card">
+    <div class="lock-icon">🔒</div>
+    <h1>Domino Craft</h1>
+    <p class="subtitle">Доступ только для своих</p>
+    <input id="gate-link" placeholder="Ссылка из нашего Discord" spellcheck="false">
+    <button id="btn-gate" class="primary">Войти</button>
+    <div id="gate-error" class="error-text"></div>
+    <div class="subtle" style="text-align:center">Ссылку даёт админ в Discord-сервере.</div>
+  </div>
+</div>
+
+<div id="login" class="screen hidden">
   <div class="login-card">
     <svg class="logo" viewBox="0 0 60 110" width="52" height="95" aria-hidden="true">
       <rect x="2" y="2" width="56" height="106" rx="10" fill="#eceadf" stroke="#1a1d24" stroke-width="3"/>
