@@ -11,6 +11,29 @@ function matchesAccess(input, key) {
   return norm(input).includes(k);
 }
 
+// Проверка одноразового кода на сервере Discord-бота (эндпоинт /launcher/verify).
+// Возвращает { ok, network }: network=false — сервер недоступен (код не тратится).
+async function verifyRemote(apiUrl, input, fetchFn = fetch) {
+  const code = String(input || '').trim();
+  if (!code) return { ok: false, network: true };
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 7000);
+    const res = await fetchFn(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    if (!res.ok) return { ok: false, network: true };
+    const data = await res.json();
+    return { ok: !!data.ok, network: true };
+  } catch {
+    return { ok: false, network: false };
+  }
+}
+
 async function loadAccess(file) {
   try {
     const data = JSON.parse(await fs.readFile(file, 'utf8'));
@@ -26,4 +49,4 @@ async function saveAccess(file, unlocked) {
   return { unlocked: !!unlocked };
 }
 
-module.exports = { matchesAccess, loadAccess, saveAccess };
+module.exports = { matchesAccess, verifyRemote, loadAccess, saveAccess };

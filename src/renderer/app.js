@@ -170,13 +170,18 @@ function showGate(session) {
   $('main').classList.add('hidden');
   $('gate').classList.remove('hidden');
   const submit = async () => {
+    $('btn-gate').disabled = true;
+    $('gate-error').textContent = '';
     const r = await launcher.accessSubmit($('gate-link').value);
+    $('btn-gate').disabled = false;
     if (r.unlocked) {
       $('gate').classList.add('hidden');
       if (session) showMain(session);
       else $('login').classList.remove('hidden');
+    } else if (r.offline) {
+      $('gate-error').textContent = 'Нет связи с сервером — попробуй чуть позже.';
     } else {
-      $('gate-error').textContent = 'Неверная ссылка. Возьми актуальную в нашем Discord.';
+      $('gate-error').textContent = 'Неверный или истёкший код. Возьми новый: /linkcraft в Discord.';
     }
   };
   $('btn-gate').onclick = submit;

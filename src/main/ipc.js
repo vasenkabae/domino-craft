@@ -10,7 +10,7 @@ const { fetchManifest } = require('./manifest');
 const { play } = require('./game');
 const { loadFriends, addFriend, removeFriend, addWatched, removeWatched } = require('./friends');
 const { pollPresence } = require('./presence');
-const { matchesAccess, loadAccess, saveAccess } = require('./access');
+const { matchesAccess, verifyRemote, loadAccess, saveAccess } = require('./access');
 
 function registerIpc(win) {
   const userData = app.getPath('userData');
@@ -40,13 +40,22 @@ function registerIpc(win) {
     settings: await loadSettings(settingsFile),
     session: await readSession(),
     access: {
-      required: !!config.accessKey,
+      required: !!(config.accessApi || config.accessKey),
       unlocked: (await loadAccess(accessFile)).unlocked
     }
   }));
 
-  // Экран-замок: пускаем в лаунчер только по ссылке/коду из Discord
+  // Экран-замок: одноразовый код из Discord-бота (/linkcraft) проверяется на VPS;
+  // без accessApi — фолбэк на статичный accessKey; без обоих — замка нет.
   ipcMain.handle('access:submit', async (_e, input) => {
+    if (config.accessApi) {
+      const r = await verifyRemote(config.accessApi, input);
+      if (r.ok) {
+        await saveAccess(accessFile, true);
+        return { unlocked: true };
+      }
+      return { unlocked: false, offline: !r.network };
+    }
     if (matchesAccess(input, config.accessKey)) {
       await saveAccess(accessFile, true);
       return { unlocked: true };
