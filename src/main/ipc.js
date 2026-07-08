@@ -10,6 +10,7 @@ const { fetchManifest } = require('./manifest');
 const { play } = require('./game');
 const { loadFriends, addFriend, removeFriend, addWatched, removeWatched } = require('./friends');
 const { pollPresence } = require('./presence');
+const { matchesAccess, loadAccess, saveAccess } = require('./access');
 
 function registerIpc(win) {
   const userData = app.getPath('userData');
@@ -17,6 +18,7 @@ function registerIpc(win) {
   const sessionFile = path.join(userData, 'session.json');
   const manifestCache = path.join(userData, 'manifest.cache.json');
   const friendsFile = path.join(userData, 'friends.json');
+  const accessFile = path.join(userData, 'access.json');
   let busy = false;
   let paidServer = null; // адрес платного сервера из манифеста (для presence)
 
@@ -36,8 +38,21 @@ function registerIpc(win) {
   ipcMain.handle('get-state', async () => ({
     config: { name: config.name },
     settings: await loadSettings(settingsFile),
-    session: await readSession()
+    session: await readSession(),
+    access: {
+      required: !!config.accessKey,
+      unlocked: (await loadAccess(accessFile)).unlocked
+    }
   }));
+
+  // Экран-замок: пускаем в лаунчер только по ссылке/коду из Discord
+  ipcMain.handle('access:submit', async (_e, input) => {
+    if (matchesAccess(input, config.accessKey)) {
+      await saveAccess(accessFile, true);
+      return { unlocked: true };
+    }
+    return { unlocked: false };
+  });
 
   ipcMain.handle('login-offline', async (_e, nick) => {
     nick = String(nick || '').trim();

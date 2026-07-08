@@ -46,7 +46,7 @@ h1, h2, .brand { font-family: "Bahnschrift", "Segoe UI", sans-serif; letter-spac
 }
 
 /* ---------- Вход ---------- */
-#login { align-items: center; justify-content: center; }
+#login, #gate { align-items: center; justify-content: center; }
 .login-card {
   width: 380px;
   background: var(--glass);
@@ -375,3 +375,7 @@ button.small { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
 }
 .friend-remove { color: var(--muted); }
 .friend-remove:hover { color: var(--danger); border-color: var(--danger); }
+
+/* ---------- Замок доступа ---------- */
+.lock-icon { font-size: 46px; text-align: center; line-height: 1; }
+#gate-link { text-align: center; }
