@@ -22,9 +22,11 @@ function buildLaunchOptions({ manifest, auth, memoryMb, root, javaPath, customVe
 
   const srv = manifest.server;
   if (srv && srv.host) {
-    const minor = parseInt(manifest.minecraft.split('.')[1], 10) || 0;
+    const parts = manifest.minecraft.split('.').map(n => parseInt(n, 10) || 0);
+    // quickPlay: с 1.20+, а новая схема версий (25.x, 26.x…) — всегда
+    const useQuickPlay = parts[0] !== 1 || (parts[1] || 0) >= 20;
     const port = srv.port || 25565;
-    if (minor >= 20) {
+    if (useQuickPlay) {
       opts.quickPlay = { type: 'multiplayer', identifier: `${srv.host}:${port}` };
     } else {
       opts.customLaunchArgs = ['--server', srv.host, '--port', String(port)];
