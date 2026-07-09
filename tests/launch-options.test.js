@@ -25,6 +25,14 @@ describe('buildLaunchOptions', () => {
     expect(opts.customLaunchArgs).toEqual(['--server', 'play.example.com', '--port', '25565']);
     expect(opts.quickPlay).toBeUndefined();
   });
+  it('quickPlay для новой схемы версий (26.2)', () => {
+    const opts = buildLaunchOptions({
+      ...base,
+      manifest: { minecraft: '26.2', server: { host: '45.93.200.45', port: 25589 }, files: [] }
+    });
+    expect(opts.quickPlay).toEqual({ type: 'multiplayer', identifier: '45.93.200.45:25589' });
+    expect(opts.customLaunchArgs).toBeUndefined();
+  });
   it('без сервера — без автоподключения', () => {
     const opts = buildLaunchOptions({ ...base, manifest: { minecraft: '1.20.1', files: [] } });
     expect(opts.quickPlay).toBeUndefined();
