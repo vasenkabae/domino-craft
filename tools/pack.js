@@ -25,12 +25,16 @@ const files = [];
     if (e.isDirectory()) { walk(p); continue; }
     const rel = path.relative(dir, p).split(path.sep).join('/');
     const buf = fs.readFileSync(p);
+    const encoded = rel.split('/').map(encodeURIComponent).join('/');
+    // baseUrl (напр. VPS) в приоритете — raw.githubusercontent.com режут провайдеры РФ.
+    const url = cfg.baseUrl
+      ? `${cfg.baseUrl.replace(/\/$/, '')}/${encoded}`
+      : `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${encoded}`;
     files.push({
       path: rel,
       sha1: crypto.createHash('sha1').update(buf).digest('hex'),
       size: buf.length,
-      url: `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/`
-        + rel.split('/').map(encodeURIComponent).join('/')
+      url
     });
   }
 })(dir);
