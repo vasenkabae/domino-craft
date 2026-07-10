@@ -11,17 +11,4 @@ async function getServerStatus(host, port = 25565) {
   }
 }
 
-// news.json в репозитории сборки: [{ date, title, text }]
-async function fetchNews(url) {
-  if (!url) return [];
-  try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const items = await res.json();
-    return Array.isArray(items) ? items : [];
-  } catch {
-    return [];
-  }
-}
-
-module.exports = { getServerStatus, fetchNews };
+module.exports = { getServerStatus };

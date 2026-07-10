@@ -193,7 +193,6 @@ function showMain(session) {
   $('main').classList.remove('hidden');
   $('user-name').textContent = session.name;
   refreshStatus();
-  refreshNews();
   setInterval(refreshStatus, 30000);
 }
 
@@ -206,26 +205,6 @@ async function refreshStatus() {
   } else {
     chip.textContent = 'Сервер офлайн';
     chip.className = 'server-chip offline';
-  }
-}
-
-async function refreshNews() {
-  const items = await launcher.news();
-  if (!items.length) return;
-  const box = $('news');
-  box.innerHTML = '';
-  for (const n of items) {
-    const el = document.createElement('div');
-    el.className = 'news-item';
-    const date = document.createElement('div');
-    date.className = 'date';
-    date.textContent = n.date || '';
-    const h = document.createElement('h3');
-    h.textContent = n.title || '';
-    const p = document.createElement('p');
-    p.textContent = n.text || '';
-    el.append(date, h, p);
-    box.append(el);
   }
 }
 

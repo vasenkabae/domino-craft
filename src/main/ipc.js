@@ -5,7 +5,7 @@ const config = require('../../launcher.config.json');
 const { loadSettings, saveSettings } = require('./settings');
 const { offlineAuth, offlineUuid } = require('./offline-auth');
 const { loginMicrosoft, refreshMicrosoft } = require('./msauth');
-const { getServerStatus, fetchNews } = require('./status');
+const { getServerStatus } = require('./status');
 const { fetchManifest } = require('./manifest');
 const { play } = require('./game');
 const { loadFriends, addFriend, removeFriend, addWatched, removeWatched } = require('./friends');
@@ -95,7 +95,6 @@ function registerIpc(win) {
     }
   });
 
-  ipcMain.handle('news', () => fetchNews(config.newsUrl));
 
   ipcMain.handle('vanilla-versions', async () => {
     try {

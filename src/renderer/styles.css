@@ -166,16 +166,16 @@ header {
 .user { display: flex; align-items: center; gap: 10px; }
 #user-name { color: var(--muted); font-size: 14px; }
 
-.news {
+.features {
   flex: 1; overflow-y: auto;
   padding: 26px 30px;
   display: flex; flex-direction: column; gap: 14px;
 }
-.news::-webkit-scrollbar { width: 8px; }
-.news::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); border-radius: 99px; }
-.news::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .22); }
+.features::-webkit-scrollbar { width: 8px; }
+.features::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); border-radius: 99px; }
+.features::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .22); }
 
-.news-item {
+.feature-item {
   background: var(--glass);
   backdrop-filter: blur(14px);
   border: 1px solid var(--line);
@@ -184,15 +184,13 @@ header {
   transition: transform .2s, border-color .2s, box-shadow .2s;
   animation: rise .4s ease both;
 }
-.news-item:hover {
+.feature-item:hover {
   transform: translateY(-2px);
   border-color: rgba(63, 185, 80, .35);
   box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
 }
-.news-item .date { color: var(--muted); font-size: 12px; }
-.news-item h3 { font-size: 15px; margin: 5px 0 7px; }
-.news-item p { color: #bcc3d2; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
-.news-empty { color: var(--muted); text-align: center; margin-top: 70px; }
+.feature-item h3 { font-size: 15px; margin: 0 0 7px; }
+.feature-item p { color: #bcc3d2; font-size: 14px; line-height: 1.55; }
 
 footer {
   display: flex; align-items: center; gap: 24px;

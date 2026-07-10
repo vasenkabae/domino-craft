@@ -9,7 +9,6 @@ contextBridge.exposeInMainWorld('launcher', {
   play: () => ipcRenderer.invoke('play'),
   saveSettings: patch => ipcRenderer.invoke('save-settings', patch),
   serverStatus: () => ipcRenderer.invoke('server-status'),
-  news: () => ipcRenderer.invoke('news'),
   vanillaVersions: () => ipcRenderer.invoke('vanilla-versions'),
   chooseDir: () => ipcRenderer.invoke('choose-dir'),
   friendsList: () => ipcRenderer.invoke('friends:list'),

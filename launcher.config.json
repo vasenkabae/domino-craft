@@ -1,7 +1,6 @@
 {
   "name": "Domino Craft",
   "manifestUrl": "http://138.16.181.96:8765/dc/manifest.json",
-  "newsUrl": "http://138.16.181.96:8765/dc/news.json",
   "azureClientId": null,
   "accessKey": null,
   "accessApi": "http://138.16.181.96:8765/launcher/verify"
