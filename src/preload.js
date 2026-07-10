@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('launcher', {
   serverStatus: () => ipcRenderer.invoke('server-status'),
   vanillaVersions: () => ipcRenderer.invoke('vanilla-versions'),
   chooseDir: () => ipcRenderer.invoke('choose-dir'),
+  chooseSkin: () => ipcRenderer.invoke('skin:choose'),
+  applySkin: filePath => ipcRenderer.invoke('skin:apply', filePath),
   friendsList: () => ipcRenderer.invoke('friends:list'),
   friendsAdd: (nick, note) => ipcRenderer.invoke('friends:add', { nick, note }),
   friendsRemove: nick => ipcRenderer.invoke('friends:remove', nick),

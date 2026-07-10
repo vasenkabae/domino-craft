@@ -11,6 +11,7 @@ const { play } = require('./game');
 const { loadFriends, addFriend, removeFriend, addWatched, removeWatched } = require('./friends');
 const { pollPresence } = require('./presence');
 const { matchesAccess, verifyRemote, loadAccess, saveAccess } = require('./access');
+const { validateSkinPng, uploadSkin } = require('./skin');
 
 function registerIpc(win) {
   const userData = app.getPath('userData');
@@ -83,6 +84,30 @@ function registerIpc(win) {
   ipcMain.handle('choose-dir', async () => {
     const res = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
     return res.canceled ? null : res.filePaths[0];
+  });
+
+  ipcMain.handle('skin:choose', async () => {
+    const res = await dialog.showOpenDialog(win, {
+      properties: ['openFile'],
+      filters: [{ name: 'PNG-скин', extensions: ['png'] }]
+    });
+    if (res.canceled) return null;
+    const buffer = await fs.readFile(res.filePaths[0]);
+    try {
+      validateSkinPng(buffer);
+    } catch (e) {
+      return { error: e.message };
+    }
+    return { filePath: res.filePaths[0], dataUrl: 'data:image/png;base64,' + buffer.toString('base64') };
+  });
+
+  ipcMain.handle('skin:apply', async (_e, filePath) => {
+    const session = await readSession();
+    if (!session) throw new Error('Сначала войди в аккаунт');
+    const buffer = await fs.readFile(filePath);
+    validateSkinPng(buffer);
+    const apiBase = config.manifestUrl.replace(/\/dc\/manifest\.json$/, '');
+    return uploadSkin(apiBase, session.name, buffer);
   });
 
   ipcMain.handle('server-status', async () => {
