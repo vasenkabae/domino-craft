@@ -377,3 +377,7 @@ button.small { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
 /* ---------- Замок доступа ---------- */
 .lock-icon { font-size: 46px; text-align: center; line-height: 1; }
 #gate-link { text-align: center; }
+
+/* ---------- Смена скина ---------- */
+.skin-preview-row { display: flex; gap: 12px; justify-content: center; margin: 12px 0; }
+.skin-preview { image-rendering: pixelated; background: rgba(255, 255, 255, 0.05); border-radius: 6px; }

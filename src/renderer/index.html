@@ -51,6 +51,7 @@
     <div class="user">
       <span id="user-name"></span>
       <button id="btn-friends" class="icon" title="Друзья">👥</button>
+      <button id="btn-skin" class="icon" title="Скин">🧑</button>
       <button id="btn-settings" class="icon" title="Настройки">⚙</button>
     </div>
   </header>
@@ -114,6 +115,24 @@
     <div id="friends-list" class="friends-list"></div>
     <div class="modal-buttons">
       <button id="btn-close-friends" class="primary">Готово</button>
+    </div>
+  </div>
+</div>
+
+<div id="skin-modal" class="modal hidden">
+  <div class="modal-card">
+    <h2>Скин</h2>
+    <div class="row">
+      <button id="btn-choose-skin" class="small">Выбрать PNG (64×64)</button>
+    </div>
+    <div id="skin-error" class="error-text"></div>
+    <div class="skin-preview-row">
+      <canvas id="skin-preview-front" width="128" height="128" class="skin-preview"></canvas>
+      <canvas id="skin-preview-back" width="128" height="128" class="skin-preview"></canvas>
+    </div>
+    <div class="modal-buttons">
+      <button id="btn-apply-skin" class="primary" disabled>Применить</button>
+      <button id="btn-close-skin">Закрыть</button>
     </div>
   </div>
 </div>

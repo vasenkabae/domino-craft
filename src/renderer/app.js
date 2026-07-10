@@ -5,6 +5,7 @@ let running = false;
 let friendsData = { friends: [], watchedServers: [] };
 let presenceByNick = {}; // ник(в нижнем регистре) -> { online, server }
 let serversByLabel = {}; // ярлык сервера -> { host, port, ... }
+let chosenSkinPath = null;
 
 init();
 
@@ -113,6 +114,11 @@ async function init() {
   $('btn-add-friend').onclick = addFriendFromInput;
   $('friend-nick').onkeydown = e => { if (e.key === 'Enter') addFriendFromInput(); };
   launcher.onPresence(applyPresence);
+
+  $('btn-skin').onclick = openSkin;
+  $('btn-close-skin').onclick = () => $('skin-modal').classList.add('hidden');
+  $('btn-choose-skin').onclick = chooseSkinFile;
+  $('btn-apply-skin').onclick = applyChosenSkin;
 
   launcher.onProgress(p => {
     const label = p.phase === 'sync' ? `Сборка: ${p.label} (${p.current}/${p.total})`
@@ -319,4 +325,64 @@ function clampInt(v, min, max, fallback) {
 
 function cleanError(e) {
   return String(e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, '');
+}
+
+function openSkin() {
+  chosenSkinPath = null;
+  $('skin-error').textContent = '';
+  $('btn-apply-skin').disabled = true;
+  clearSkinPreview();
+  $('skin-modal').classList.remove('hidden');
+}
+
+async function chooseSkinFile() {
+  const res = await launcher.chooseSkin();
+  if (!res) return;
+  if (res.error) {
+    $('skin-error').textContent = res.error;
+    $('btn-apply-skin').disabled = true;
+    clearSkinPreview();
+    return;
+  }
+  $('skin-error').textContent = '';
+  chosenSkinPath = res.filePath;
+  $('btn-apply-skin').disabled = false;
+  drawSkinPreview(res.dataUrl);
+}
+
+function clearSkinPreview() {
+  for (const id of ['skin-preview-front', 'skin-preview-back']) {
+    const ctx = $(id).getContext('2d');
+    ctx.clearRect(0, 0, 128, 128);
+  }
+}
+
+function drawSkinPreview(dataUrl) {
+  const img = new Image();
+  img.onload = () => {
+    drawSkinCrop('skin-preview-front', img, 8, 8, 8, 8);
+    drawSkinCrop('skin-preview-back', img, 24, 8, 8, 8);
+  };
+  img.src = dataUrl;
+}
+
+function drawSkinCrop(canvasId, img, sx, sy, sw, sh) {
+  const canvas = $(canvasId);
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+}
+
+async function applyChosenSkin() {
+  if (!chosenSkinPath) return;
+  $('btn-apply-skin').disabled = true;
+  try {
+    await launcher.applySkin(chosenSkinPath);
+    $('skin-modal').classList.add('hidden');
+  } catch (e) {
+    $('skin-error').textContent = e.message;
+  } finally {
+    $('btn-apply-skin').disabled = false;
+  }
 }
