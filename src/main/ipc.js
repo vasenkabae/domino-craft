@@ -1,4 +1,4 @@
-const { app, ipcMain, dialog } = require('electron');
+const { app, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs/promises');
 const config = require('../../launcher.config.json');
@@ -8,8 +8,6 @@ const { loginMicrosoft, refreshMicrosoft } = require('./msauth');
 const { getServerStatus } = require('./status');
 const { fetchManifest } = require('./manifest');
 const { play } = require('./game');
-const { loadFriends, addFriend, removeFriend, addWatched, removeWatched } = require('./friends');
-const { pollPresence } = require('./presence');
 const { matchesAccess, verifyRemote, loadAccess, saveAccess } = require('./access');
 const { validateSkinPng, uploadSkin } = require('./skin');
 
@@ -18,10 +16,8 @@ function registerIpc(win) {
   const settingsFile = path.join(userData, 'settings.json');
   const sessionFile = path.join(userData, 'session.json');
   const manifestCache = path.join(userData, 'manifest.cache.json');
-  const friendsFile = path.join(userData, 'friends.json');
   const accessFile = path.join(userData, 'access.json');
   let busy = false;
-  let paidServer = null; // адрес платного сервера из манифеста (для presence)
 
   const emit = (channel, payload) => {
     if (!win.isDestroyed()) win.webContents.send(channel, payload);
@@ -38,6 +34,7 @@ function registerIpc(win) {
 
   ipcMain.handle('get-state', async () => ({
     config: { name: config.name },
+    version: app.getVersion(),
     settings: await loadSettings(settingsFile),
     session: await readSession(),
     access: {
@@ -84,6 +81,16 @@ function registerIpc(win) {
   ipcMain.handle('choose-dir', async () => {
     const res = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
     return res.canceled ? null : res.filePaths[0];
+  });
+
+  // Открыть папку с файлами игры в проводнике (для текущего режима)
+  ipcMain.handle('open-game-dir', async () => {
+    const settings = await loadSettings(settingsFile);
+    const dir = settings.mode === 'vanilla'
+      ? path.join(userData, 'vanilla')
+      : (settings.gameDir || path.join(userData, 'game'));
+    await fs.mkdir(dir, { recursive: true }); // до первого запуска папки может ещё не быть
+    await shell.openPath(dir);
   });
 
   ipcMain.handle('skin:choose', async () => {
@@ -156,61 +163,6 @@ function registerIpc(win) {
     }
   });
 
-  // --- Друзья и presence ---
-  ipcMain.handle('friends:list', () => loadFriends(friendsFile));
-  ipcMain.handle('friends:add', async (_e, { nick, note }) => {
-    const s = await addFriend(friendsFile, nick, note);
-    presenceTick().catch(() => {}); // сразу обновить статус нового друга
-    return s;
-  });
-  ipcMain.handle('friends:remove', (_e, nick) => removeFriend(friendsFile, nick));
-  ipcMain.handle('friends:watch-add', async (_e, server) => {
-    const s = await addWatched(friendsFile, server);
-    presenceTick().catch(() => {});
-    return s;
-  });
-  ipcMain.handle('friends:watch-remove', (_e, server) => removeWatched(friendsFile, server));
-
-  // Разрешаем адрес платного сервера один раз — он редко меняется
-  async function resolvePaidServer() {
-    try {
-      const { manifest } = await fetchManifest(config.manifestUrl, manifestCache);
-      if (manifest.server && manifest.server.host) {
-        paidServer = { label: 'Наш сервер', host: manifest.server.host, port: manifest.server.port || 25565 };
-      }
-    } catch {
-      // нет сети/сервера — presence поработает только по локальным watchedServers
-    }
-  }
-
-  let ticking = false;
-  async function presenceTick() {
-    if (ticking) return;
-    ticking = true;
-    try {
-      const state = await loadFriends(friendsFile);
-      if (!state.friends.length) {
-        emit('presence:update', { friends: [], servers: [] });
-        return;
-      }
-      const watched = [];
-      if (paidServer) watched.push(paidServer);
-      for (const w of state.watchedServers) {
-        if (!watched.some(x => x.host === w.host && (x.port || 25565) === (w.port || 25565))) {
-          watched.push(w);
-        }
-      }
-      emit('presence:update', await pollPresence(state.friends, watched, getServerStatus));
-    } catch {
-      // presence не критичен — молча пропускаем тик
-    } finally {
-      ticking = false;
-    }
-  }
-
-  resolvePaidServer().then(() => presenceTick());
-  const presenceTimer = setInterval(() => presenceTick().catch(() => {}), 15000);
-  win.on('closed', () => clearInterval(presenceTimer));
 }
 
 module.exports = { registerIpc };

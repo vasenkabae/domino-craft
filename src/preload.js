@@ -11,14 +11,9 @@ contextBridge.exposeInMainWorld('launcher', {
   serverStatus: () => ipcRenderer.invoke('server-status'),
   vanillaVersions: () => ipcRenderer.invoke('vanilla-versions'),
   chooseDir: () => ipcRenderer.invoke('choose-dir'),
+  openGameDir: () => ipcRenderer.invoke('open-game-dir'),
   chooseSkin: () => ipcRenderer.invoke('skin:choose'),
   applySkin: filePath => ipcRenderer.invoke('skin:apply', filePath),
-  friendsList: () => ipcRenderer.invoke('friends:list'),
-  friendsAdd: (nick, note) => ipcRenderer.invoke('friends:add', { nick, note }),
-  friendsRemove: nick => ipcRenderer.invoke('friends:remove', nick),
-  friendsWatchAdd: server => ipcRenderer.invoke('friends:watch-add', server),
-  friendsWatchRemove: server => ipcRenderer.invoke('friends:watch-remove', server),
   onProgress: cb => ipcRenderer.on('progress', (_e, p) => cb(p)),
-  onState: cb => ipcRenderer.on('state', (_e, s) => cb(s)),
-  onPresence: cb => ipcRenderer.on('presence:update', (_e, p) => cb(p))
+  onState: cb => ipcRenderer.on('state', (_e, s) => cb(s))
 });

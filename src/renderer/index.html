@@ -50,7 +50,6 @@
     <div class="server-chip offline" id="server-chip">Сервер: проверяем…</div>
     <div class="user">
       <span id="user-name"></span>
-      <button id="btn-friends" class="icon" title="Друзья">👥</button>
       <button id="btn-skin" class="icon" title="Скин">🧑</button>
       <button id="btn-settings" class="icon" title="Настройки">⚙</button>
     </div>
@@ -61,13 +60,13 @@
     <div class="features-grid">
       <div class="feature-item">
         <h3><span class="fi">🏰</span>Города</h3>
-        <p>Оснуй город там, где стоишь. Граница растёт с числом жителей, приглашения и топы — в K-меню.
+        <p>Создай свой город там, где стоишь. Граница растёт с числом жителей, приглашения и топы — в K-меню.
         Территория без приватов — мир остаётся открытым.</p>
       </div>
       <div class="feature-item">
         <h3><span class="fi">💬</span>Чат</h3>
-        <p>Обычное сообщение — локально, слышат игроки поблизости. С восклицательным знаком — глобально.
-        С решёткой — только жители своего города.</p>
+        <p>Обычное сообщение — локально, слышат игроки поблизости. С ! — глобально.
+        С # — только жители своего города.</p>
       </div>
       <div class="feature-item">
         <h3><span class="fi">⚡</span>Баффы города</h3>
@@ -111,21 +110,6 @@
     </div>
     <button id="btn-play" class="primary big">ИГРАТЬ</button>
   </footer>
-</div>
-
-<div id="friends-modal" class="modal hidden">
-  <div class="modal-card">
-    <h2>Друзья</h2>
-    <div class="row">
-      <input id="friend-nick" class="grow" placeholder="Ник друга" maxlength="16" spellcheck="false">
-      <button id="btn-add-friend" class="small">Добавить</button>
-    </div>
-    <div id="friends-hint" class="subtle">Видно, кто из друзей сейчас на наших серверах.</div>
-    <div id="friends-list" class="friends-list"></div>
-    <div class="modal-buttons">
-      <button id="btn-close-friends" class="primary">Готово</button>
-    </div>
-  </div>
 </div>
 
 <div id="skin-modal" class="modal hidden">
@@ -184,6 +168,7 @@
           <button id="btn-choose-dir" class="small">Выбрать</button>
           <button id="btn-reset-dir" class="small">Сброс</button>
         </div>
+        <button id="btn-open-dir" class="small">Открыть папку с файлами игры</button>
       </div>
 
       <div class="field">
@@ -194,6 +179,7 @@
     </div>
 
     <div class="modal-buttons">
+      <span id="app-version" class="subtle version"></span>
       <button id="btn-logout">Выйти из аккаунта</button>
       <button id="btn-close-settings" class="primary">Готово</button>
     </div>

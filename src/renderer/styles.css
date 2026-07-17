@@ -428,37 +428,8 @@ button.small { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
 #error-text::-webkit-scrollbar { width: 8px; }
 #error-text::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); border-radius: 99px; }
 
-/* ---------- Друзья ---------- */
 .subtle { color: var(--muted); font-size: 12px; }
-#friend-nick { color: var(--text); }
-.friends-list {
-  display: flex; flex-direction: column; gap: 8px;
-  max-height: 48vh; overflow-y: auto;
-  margin: 4px -6px 0 0; padding-right: 6px;
-}
-.friends-list::-webkit-scrollbar { width: 8px; }
-.friends-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); border-radius: 99px; }
-.friends-empty { color: var(--muted); text-align: center; padding: 20px 0; font-size: 13px; }
-.friend-row {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(12, 11, 15, .5);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 9px 11px;
-  transition: border-color .2s;
-}
-.friend-row:hover { border-color: var(--line-bright); }
-.friend-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
-.friend-row.online .friend-dot { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
-.friend-name { color: var(--text); font-size: 14px; font-weight: 600; }
-.friend-meta { color: var(--muted); font-size: 12px; margin-left: 2px; }
-.friend-row .spacer { flex: 1; }
-.friend-copy, .friend-remove {
-  padding: 6px 10px; font-size: 12px; border-radius: 8px;
-  background: rgba(255, 255, 255, .05); border: 1px solid var(--line-bright); color: var(--text);
-}
-.friend-remove { color: var(--muted); }
-.friend-remove:hover { color: var(--danger); border-color: var(--danger); }
+.version { margin-right: auto; align-self: center; user-select: text; }
 
 /* ---------- Замок доступа ---------- */
 .lock-icon { font-size: 46px; text-align: center; line-height: 1; }
