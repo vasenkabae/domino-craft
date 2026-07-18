@@ -3,5 +3,6 @@
   "manifestUrl": "http://138.16.181.96:8765/dc/manifest.json",
   "azureClientId": null,
   "accessKey": null,
-  "accessApi": "http://138.16.181.96:8765/launcher/verify"
+  "accessApi": "http://138.16.181.96:8765/launcher/verify",
+  "authApi": "http://45.93.200.45:18582"
 }

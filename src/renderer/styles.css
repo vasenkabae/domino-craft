@@ -90,7 +90,7 @@ h1, h2, .brand { font-family: "Bahnschrift", "Segoe UI", sans-serif; letter-spac
 }
 .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; }
 
-#nick, #gate-link {
+#nick, #gate-link, #pw, #pw2 {
   background: rgba(12, 11, 15, .7);
   border: 1px solid var(--line-bright);
   border-radius: 10px;
@@ -101,7 +101,9 @@ h1, h2, .brand { font-family: "Bahnschrift", "Segoe UI", sans-serif; letter-spac
   text-align: center;
   transition: border-color .2s, box-shadow .2s;
 }
-#nick:focus, #gate-link:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+#nick:focus, #gate-link:focus, #pw:focus, #pw2:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow);
+}
 
 button {
   border: 1px solid var(--line-bright);
@@ -146,6 +148,16 @@ button.icon { padding: 8px 12px; font-size: 16px; border-radius: 10px; }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line-bright); }
 
 .error-text { color: var(--danger); font-size: 13px; min-height: 17px; }
+
+/* Шаг с паролем на экране входа */
+#pw-block { display: flex; flex-direction: column; gap: 12px; }
+.pw-hint { line-height: 1.4; }
+.link-btn {
+  background: none; border: none; box-shadow: none;
+  color: var(--muted); font-size: 13px; padding: 0; align-self: flex-start;
+}
+.link-btn:hover { background: none; border: none; color: var(--text); }
+input:read-only { color: var(--muted); }
 
 /* ---------- Главный экран ---------- */
 header {

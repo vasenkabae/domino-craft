@@ -37,6 +37,14 @@
     <h1 id="title-login">Domino Craft</h1>
     <p class="subtitle">Сервер для своих</p>
     <input id="nick" placeholder="Ник (латиница, 3–16)" maxlength="16" spellcheck="false">
+
+    <div id="pw-block" class="hidden">
+      <div id="pw-hint" class="subtle pw-hint"></div>
+      <input id="pw" type="password" placeholder="Пароль" maxlength="64" spellcheck="false">
+      <input id="pw2" type="password" placeholder="Повтори пароль" maxlength="64" spellcheck="false" class="hidden">
+      <button id="btn-back" class="link-btn">← Другой ник</button>
+    </div>
+
     <button id="btn-offline" class="primary">Играть</button>
     <div class="divider"><span>или</span></div>
     <button id="btn-ms">Войти через Microsoft</button>

@@ -3,6 +3,8 @@ const $ = id => document.getElementById(id);
 let settings = { memoryMb: 4096 };
 let running = false;
 let chosenSkinPath = null;
+let authRequired = false;
+let loginStep = 'nick'; // nick → login | register
 
 init();
 
@@ -24,16 +26,12 @@ async function init() {
     $('login').classList.remove('hidden');
   }
 
-  $('btn-offline').onclick = async () => {
-    try {
-      const session = await launcher.loginOffline($('nick').value);
-      $('login-error').textContent = '';
-      showMain(session);
-    } catch (e) {
-      $('login-error').textContent = cleanError(e);
-    }
-  };
-  $('nick').onkeydown = e => { if (e.key === 'Enter') $('btn-offline').click(); };
+  authRequired = !!state.config.authRequired;
+  $('btn-offline').onclick = submitLogin;
+  $('btn-back').onclick = resetLogin;
+  for (const id of ['nick', 'pw', 'pw2']) {
+    $(id).onkeydown = e => { if (e.key === 'Enter') submitLogin(); };
+  }
 
   $('btn-ms').onclick = async () => {
     try {
@@ -198,6 +196,70 @@ function showGate(session) {
   };
   $('btn-gate').onclick = submit;
   $('gate-link').onkeydown = e => { if (e.key === 'Enter') submit(); };
+}
+
+// Вход в два шага: сперва ник (сервер говорит, знаком ли он), потом пароль от Domino Auth
+// или придумывание нового при регистрации.
+async function submitLogin() {
+  const btn = $('btn-offline');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  $('login-error').textContent = '';
+  try {
+    if (loginStep === 'nick') await stepNick();
+    else await stepPassword();
+  } catch (e) {
+    $('login-error').textContent = cleanError(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function stepNick() {
+  const nick = $('nick').value.trim();
+  // Замок выключен или сервер авторизации недоступен — пускаем как раньше,
+  // иначе нельзя было бы даже в ваниллу поиграть, пока сервер лежит.
+  if (!authRequired) return showMain(await launcher.loginOffline(nick));
+  const r = await launcher.checkNick(nick);
+  if (!r.network) {
+    $('login-error').textContent = 'Сервер недоступен — вход без пароля.';
+    return showMain(await launcher.loginOffline(nick));
+  }
+  loginStep = r.exists ? 'login' : 'register';
+  $('nick').readOnly = true;
+  $('pw-block').classList.remove('hidden');
+  $('pw2').classList.toggle('hidden', loginStep === 'login');
+  $('pw-hint').textContent = r.exists
+    ? 'Этот ник уже занят — введи пароль от Domino Auth.'
+    : 'Ник свободен. Придумай пароль — он же понадобится в игре.';
+  $('btn-offline').textContent = r.exists ? 'Войти' : 'Зарегистрироваться';
+  $('pw').value = '';
+  $('pw2').value = '';
+  $('pw').focus();
+}
+
+async function stepPassword() {
+  const register = loginStep === 'register';
+  const password = $('pw').value;
+  if (register && password !== $('pw2').value) {
+    $('login-error').textContent = 'Пароли не совпадают.';
+    return;
+  }
+  const r = await launcher.authSubmit({ nick: $('nick').value.trim(), password, register });
+  if (!r.ok) {
+    $('login-error').textContent = r.message || 'Не удалось войти.';
+    return;
+  }
+  showMain(r.session);
+}
+
+function resetLogin() {
+  loginStep = 'nick';
+  $('nick').readOnly = false;
+  $('pw-block').classList.add('hidden');
+  $('btn-offline').textContent = 'Играть';
+  $('login-error').textContent = '';
+  $('nick').focus();
 }
 
 function showMain(session) {

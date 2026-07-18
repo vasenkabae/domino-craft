@@ -6,12 +6,18 @@ const smoke = process.argv.includes('--smoke');
 // в smoke-режиме GPU-композитор отдаёт пустой capturePage — рендерим программно
 if (smoke) app.disableHardwareAcceleration();
 
+// Иконка окна: в упакованном виде лежит в resources, в dev — в репозитории.
+const iconPath = app.isPackaged
+  ? path.join(process.resourcesPath, 'build', 'icon.png')
+  : path.join(__dirname, '..', '..', 'build', 'icon.png');
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1000,
     height: 640,
     minWidth: 900,
     minHeight: 600,
+    icon: iconPath,
     backgroundColor: '#0f1115',
     webPreferences: { preload: path.join(__dirname, '..', 'preload.js') }
   });

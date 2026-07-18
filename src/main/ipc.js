@@ -10,6 +10,7 @@ const { fetchManifest } = require('./manifest');
 const { play } = require('./game');
 const { matchesAccess, verifyRemote, loadAccess, saveAccess } = require('./access');
 const { validateSkinPng, uploadSkin } = require('./skin');
+const { nickExists, checkPassword, registerNick } = require('./game-auth');
 
 function registerIpc(win) {
   const userData = app.getPath('userData');
@@ -33,7 +34,7 @@ function registerIpc(win) {
   };
 
   ipcMain.handle('get-state', async () => ({
-    config: { name: config.name },
+    config: { name: config.name, authRequired: !!config.authApi },
     version: app.getVersion(),
     settings: await loadSettings(settingsFile),
     session: await readSession(),
@@ -61,12 +62,38 @@ function registerIpc(win) {
     return { unlocked: false };
   });
 
-  ipcMain.handle('login-offline', async (_e, nick) => {
+  const cleanNick = nick => {
     nick = String(nick || '').trim();
     if (!/^[A-Za-z0-9_]{3,16}$/.test(nick)) {
       throw new Error('Ник: 3–16 символов, только латиница, цифры и _');
     }
+    return nick;
+  };
+
+  ipcMain.handle('login-offline', async (_e, nick) => {
+    nick = cleanNick(nick);
     return writeSession({ type: 'offline', name: nick, uuid: offlineUuid(nick) });
+  });
+
+  // Первый шаг входа: знает ли сервер этот ник. От ответа зависит, что показать —
+  // поле пароля или форму регистрации.
+  ipcMain.handle('auth:check-nick', async (_e, nick) => {
+    nick = cleanNick(nick);
+    if (!config.authApi) return { exists: true, network: false, disabled: true };
+    return nickExists(config.authApi, nick);
+  });
+
+  // Второй шаг: пароль от DominoAuth. Лаунчер только проверяет его —
+  // вход в игру всё равно подтверждает сам сервер.
+  ipcMain.handle('auth:submit', async (_e, { nick, password, register }) => {
+    nick = cleanNick(nick);
+    if (!config.authApi) throw new Error('Проверка пароля не настроена');
+    const r = register
+      ? await registerNick(config.authApi, nick, password)
+      : await checkPassword(config.authApi, nick, password);
+    if (!r.ok) return { ok: false, message: r.message, network: r.network };
+    const session = await writeSession({ type: 'offline', name: nick, uuid: offlineUuid(nick) });
+    return { ok: true, session };
   });
 
   ipcMain.handle('login-ms', async () => {

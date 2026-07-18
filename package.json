@@ -1,7 +1,7 @@
 {
   "name": "domino-craft",
   "productName": "Domino Craft",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Лаунчер Minecraft для своего сервера",
   "main": "src/main/index.js",
   "author": "vasenka",
@@ -10,8 +10,9 @@
     "start": "electron .",
     "smoke": "electron . --smoke",
     "test": "vitest run",
-    "dist": "electron-builder --win",
-    "release": "electron-builder --win --publish always"
+    "icon": "node tools/make-icon.js",
+    "dist": "npm run icon && electron-builder --win",
+    "release": "npm run icon && electron-builder --win --publish always"
   },
   "dependencies": {
     "electron-updater": "^6.3.9",
@@ -32,11 +33,17 @@
       "launcher.config.json",
       "package.json"
     ],
+    "extraResources": [
+      "build/icon.png"
+    ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
       "deleteAppDataOnUninstall": false
     },
     "publish": {

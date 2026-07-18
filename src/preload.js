@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld('launcher', {
   getState: () => ipcRenderer.invoke('get-state'),
   accessSubmit: link => ipcRenderer.invoke('access:submit', link),
   loginOffline: nick => ipcRenderer.invoke('login-offline', nick),
+  checkNick: nick => ipcRenderer.invoke('auth:check-nick', nick),
+  authSubmit: payload => ipcRenderer.invoke('auth:submit', payload),
   loginMs: () => ipcRenderer.invoke('login-ms'),
   logout: () => ipcRenderer.invoke('logout'),
   play: () => ipcRenderer.invoke('play'),
