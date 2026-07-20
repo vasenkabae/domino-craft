@@ -2,6 +2,10 @@
 // Сервер в offline-mode, поэтому личность = ник; пароль — единственное, что отличает
 // владельца ника от чужого. Лаунчер спрашивает его до запуска игры, чтобы человек
 // не узнавал о занятом нике уже внутри игры.
+//
+// Успешный login/register выдаёт токен устройства (session.token) — дальше на каждый
+// запуск игры лаунчер шлёт его в /auth/clear вместо пароля (см. main/ipc.js 'play'),
+// сервер по нему разрешает подключение. Игра сама пароль больше не спрашивает.
 
 const TIMEOUT_MS = 8000;
 
@@ -36,7 +40,7 @@ async function submit(apiBase, path, nick, password, fetchFn) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body
     }, fetchFn);
-    return { ok: !!data.ok, message: data.message || '', network: true };
+    return { ok: !!data.ok, message: data.message || '', token: data.token, network: true };
   } catch {
     return { ok: false, message: 'Сервер авторизации недоступен', network: false };
   }
@@ -48,4 +52,19 @@ const checkPassword = (apiBase, nick, password, fetchFn = fetch) =>
 const registerNick = (apiBase, nick, password, fetchFn = fetch) =>
   submit(apiBase, '/auth/register', nick, password, fetchFn);
 
-module.exports = { nickExists, checkPassword, registerNick };
+// Вызывается перед каждым запуском игры — токен вместо пароля, см. main/ipc.js 'play'.
+async function clearForLaunch(apiBase, nick, token, fetchFn = fetch) {
+  try {
+    const body = new URLSearchParams({ name: nick, token }).toString();
+    const { data } = await call(`${apiBase}/auth/clear`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    }, fetchFn);
+    return { ok: !!data.ok, message: data.message || '', network: true };
+  } catch {
+    return { ok: false, message: 'Сервер авторизации недоступен', network: false };
+  }
+}
+
+module.exports = { nickExists, checkPassword, registerNick, clearForLaunch };

@@ -10,7 +10,7 @@ const { fetchManifest } = require('./manifest');
 const { play } = require('./game');
 const { matchesAccess, verifyRemote, loadAccess, saveAccess } = require('./access');
 const { validateSkinPng, uploadSkin } = require('./skin');
-const { nickExists, checkPassword, registerNick } = require('./game-auth');
+const { nickExists, checkPassword, registerNick, clearForLaunch } = require('./game-auth');
 
 function registerIpc(win) {
   const userData = app.getPath('userData');
@@ -83,8 +83,8 @@ function registerIpc(win) {
     return nickExists(config.authApi, nick);
   });
 
-  // Второй шаг: пароль от DominoAuth. Лаунчер только проверяет его —
-  // вход в игру всё равно подтверждает сам сервер.
+  // Второй шаг: пароль от DominoAuth. Успех выдаёт токен устройства — он сохраняется в
+  // сессию и дальше на каждый запуск игры (см. 'play' ниже) заменяет собой ввод пароля.
   ipcMain.handle('auth:submit', async (_e, { nick, password, register }) => {
     nick = cleanNick(nick);
     if (!config.authApi) throw new Error('Проверка пароля не настроена');
@@ -92,7 +92,7 @@ function registerIpc(win) {
       ? await registerNick(config.authApi, nick, password)
       : await checkPassword(config.authApi, nick, password);
     if (!r.ok) return { ok: false, message: r.message, network: r.network };
-    const session = await writeSession({ type: 'offline', name: nick, uuid: offlineUuid(nick) });
+    const session = await writeSession({ type: 'offline', name: nick, uuid: offlineUuid(nick), token: r.token });
     return { ok: true, session };
   });
 
@@ -172,6 +172,13 @@ function registerIpc(win) {
       if (!session) throw new Error('Сначала войди в аккаунт');
       let auth;
       if (session.type === 'offline') {
+        // Сервер требует подключение только через лаунчер (см. DominoAuth) — на каждый
+        // запуск игры, а не только на первый вход, шлём токен устройства вместо пароля.
+        if (config.authApi) {
+          if (!session.token) throw new Error('Сессия устарела — выйди и войди заново.');
+          const c = await clearForLaunch(config.authApi, session.name, session.token);
+          if (!c.ok) throw new Error(c.message || 'Не удалось подтвердить подключение.');
+        }
         auth = offlineAuth(session.name);
       } else {
         const r = await refreshMicrosoft(session.refresh, config.azureClientId);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { nickExists, checkPassword, registerNick } from '../src/main/game-auth';
+import { nickExists, checkPassword, registerNick, clearForLaunch } from '../src/main/game-auth';
 
 const API = 'http://server:8770';
 const jsonFetch = (payload, ok = true) => {
@@ -50,6 +50,34 @@ describe('checkPassword / registerNick', () => {
 
   it('недоступный сервер — не «неверный пароль»', async () => {
     const r = await checkPassword(API, 'vasenka', 'secret', deadFetch);
+    expect(r.ok).toBe(false);
+    expect(r.network).toBe(false);
+  });
+
+  it('пробрасывает токен устройства из ответа сервера', async () => {
+    const r = await checkPassword(API, 'vasenka', 'secret',
+      jsonFetch({ ok: true, message: 'Пароль верный.', token: 'abc123' }));
+    expect(r.token).toBe('abc123');
+  });
+});
+
+describe('clearForLaunch', () => {
+  it('шлёт ник и токен на /auth/clear вместо пароля', async () => {
+    const f = jsonFetch({ ok: true, message: 'Готово.' });
+    await clearForLaunch(API, 'vasenka', 'abc123', f);
+    expect(f.lastCall.url).toBe('http://server:8770/auth/clear');
+    expect(f.lastCall.options.method).toBe('POST');
+    expect(f.lastCall.options.body).toBe('name=vasenka&token=abc123');
+  });
+
+  it('стухший/неверный токен — ok:false с причиной от сервера', async () => {
+    const r = await clearForLaunch(API, 'vasenka', 'stale',
+      jsonFetch({ ok: false, message: 'Сессия лаунчера устарела — войди заново по паролю.' }));
+    expect(r).toEqual({ ok: false, message: 'Сессия лаунчера устарела — войди заново по паролю.', network: true });
+  });
+
+  it('недоступный сервер — не путаем с неверным токеном', async () => {
+    const r = await clearForLaunch(API, 'vasenka', 'abc123', deadFetch);
     expect(r.ok).toBe(false);
     expect(r.network).toBe(false);
   });
