@@ -171,6 +171,7 @@ function registerIpc(win) {
       const session = await readSession();
       if (!session) throw new Error('Сначала войди в аккаунт');
       let auth;
+      let deviceToken = null;
       if (session.type === 'offline') {
         // Сервер требует подключение только через лаунчер (см. DominoAuth) — на каждый
         // запуск игры, а не только на первый вход, шлём токен устройства вместо пароля.
@@ -178,6 +179,7 @@ function registerIpc(win) {
           if (!session.token) throw new Error('Сессия устарела — выйди и войди заново.');
           const c = await clearForLaunch(config.authApi, session.name, session.token);
           if (!c.ok) throw new Error(c.message || 'Не удалось подтвердить подключение.');
+          deviceToken = session.token; // тот же токен уйдёт в игровую папку — см. game.js
         }
         auth = offlineAuth(session.name);
       } else {
@@ -186,7 +188,7 @@ function registerIpc(win) {
         auth = r.mclc;
       }
       const settings = await loadSettings(settingsFile);
-      await play({ config, settings, auth, paths: { userData }, emit });
+      await play({ config, settings, auth, paths: { userData }, emit, deviceToken });
       // Что делать с лаунчером после старта игры
       if (settings.afterLaunch === 'close') app.quit();
       else if (settings.afterLaunch === 'minimize' && !win.isDestroyed()) win.minimize();

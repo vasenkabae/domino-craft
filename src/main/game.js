@@ -12,9 +12,9 @@ const { getVanillaVersions } = require('./vanilla');
 // Полный цикл запуска. Режим из настроек: 'pack' — наш сервер со сборкой,
 // 'vanilla' — обычный Minecraft выбранной версии (отдельная папка, без модов).
 // emit(channel, payload) шлёт события 'progress' и 'state' в окно.
-async function play({ config, settings, auth, paths, emit }) {
+async function play({ config, settings, auth, paths, emit, deviceToken }) {
   if (settings.mode === 'vanilla') return playVanilla({ settings, auth, paths, emit });
-  return playPack({ config, settings, auth, paths, emit });
+  return playPack({ config, settings, auth, paths, emit, deviceToken });
 }
 
 async function playVanilla({ settings, auth, paths, emit }) {
@@ -42,9 +42,16 @@ async function playVanilla({ settings, auth, paths, emit }) {
   await launchClient(opts, emit);
 }
 
-async function playPack({ config, settings, auth, paths, emit }) {
+async function playPack({ config, settings, auth, paths, emit, deviceToken }) {
   const { userData } = paths;
   const root = settings.gameDir || path.join(userData, 'game');
+
+  if (deviceToken) {
+    // Кнопка «Переподключиться» в моде (DominoCitiesUI) сама предъявляет этот токен
+    // серверу при реконнекте после дисконнекта/кика/краша — чтобы не лезть в лаунчер.
+    await fs.mkdir(path.join(root, 'config'), { recursive: true });
+    await fs.writeFile(path.join(root, 'config', 'dominocraft-session.txt'), `${auth.name}\n${deviceToken}`);
+  }
 
   emit('state', { value: 'syncing' });
   const { manifest, offline } = await fetchManifest(
